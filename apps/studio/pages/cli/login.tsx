@@ -192,20 +192,12 @@ export const CliLoginScreen = ({
   }
 
   if (status._tag === 'missing-params') {
-    const isPlural = status.missingParameters.length > 1
-
     return (
       <CliLoginInterstitial
         title="Missing sign-in parameters"
         description="This Supabase CLI sign-in request cannot be authorized"
       >
         <div className="flex flex-col gap-3">
-          <Admonition
-            type="warning"
-            description={`Open the browser sign-in flow from Supabase CLI again. The URL is missing parameter${
-              isPlural ? 's' : ''
-            }: ${status.missingParameters.join(', ')}.`}
-          />
           <Button variant="default" block asChild>
             <Link href="/organizations">Back to dashboard</Link>
           </Button>
