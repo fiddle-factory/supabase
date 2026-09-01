@@ -1,5 +1,5 @@
 import { useIsLoggedIn, useParams } from 'common'
-import { Terminal } from 'lucide-react'
+import { Terminal, TriangleAlert } from 'lucide-react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -29,6 +29,12 @@ const CliLogo = () => (
   <LogoBox className="bg-black">
     <Terminal className="size-6 text-white" strokeWidth={2} />
   </LogoBox>
+)
+
+const BlueWarningIcon = () => (
+  <span className="inline-flex shrink-0 items-center justify-center size-[23px] p-1 rounded-sm text-blue-200 bg-blue-600 [&>svg]:size-full">
+    <TriangleAlert />
+  </span>
 )
 
 const CliLoginInterstitial = ({
@@ -202,6 +208,8 @@ export const CliLoginScreen = ({
         <div className="flex flex-col gap-3">
           <Admonition
             type="warning"
+            className="bg-blue-200 border-blue-400"
+            icon={<BlueWarningIcon />}
             description={`Open the browser sign-in flow from Supabase CLI again. The URL is missing parameter${
               isPlural ? 's' : ''
             }: ${status.missingParameters.join(', ')}.`}
@@ -220,6 +228,8 @@ export const CliLoginScreen = ({
         <div className="flex flex-col gap-3">
           <Admonition
             type="warning"
+            className="bg-blue-200 border-blue-400"
+            icon={<BlueWarningIcon />}
             description={
               <>
                 Supabase could not create the CLI sign-in session.
