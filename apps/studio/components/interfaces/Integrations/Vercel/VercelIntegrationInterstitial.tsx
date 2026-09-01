@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { Button, HoverCard, HoverCardContent, HoverCardTrigger } from 'ui'
 import { Admonition } from 'ui-patterns/Admonition'
 
@@ -89,9 +88,6 @@ export function VercelIntegrationInterstitialErrorState({
           </>
         }
       />
-      <Button variant="default" block asChild>
-        <Link href="/">Back to dashboard</Link>
-      </Button>
     </div>
   )
 }
