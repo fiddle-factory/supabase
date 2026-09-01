@@ -206,9 +206,6 @@ export const CliLoginScreen = ({
               isPlural ? 's' : ''
             }: ${status.missingParameters.join(', ')}.`}
           />
-          <Button variant="default" block asChild>
-            <Link href="/organizations">Back to dashboard</Link>
-          </Button>
         </div>
       </CliLoginInterstitial>
     )
