@@ -52,7 +52,7 @@ const Error404: NextPage = ({}) => {
         }`}
       >
         <div className="flex w-[380px] flex-col items-center justify-center space-y-3 text-center">
-          <h3 className="text-xl">Looking for something? 🔍</h3>
+          <h3 className="text-xl">🔍 Looking for something?</h3>
           <p className="text-foreground-light">
             We couldn't find the page that you're looking for!
           </p>
