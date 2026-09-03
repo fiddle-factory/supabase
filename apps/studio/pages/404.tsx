@@ -62,6 +62,19 @@ const Error404: NextPage = ({}) => {
             <Link href="/projects">Head back</Link>
           </Button>
         </div>
+        <div className="flex items-center space-x-2 text-sm text-foreground-lighter">
+          <Link href="https://supabase.com/docs" className="underline hover:text-foreground">
+            Documentation
+          </Link>
+          <span>·</span>
+          <Link href="/sitemap.xml" className="underline hover:text-foreground">
+            Sitemap
+          </Link>
+          <span>·</span>
+          <Link href="/llms.txt" className="underline hover:text-foreground">
+            llms.txt
+          </Link>
+        </div>
       </div>
     </div>
   )
