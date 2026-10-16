@@ -14,7 +14,7 @@ import { BASE_PATH } from '@/lib/constants'
 import { auth } from '@/lib/gotrue'
 
 const forgotPasswordSchema = z.object({
-  email: z.string().min(1, 'Please provide an email address').email('Must be a valid email'),
+  email: z.string().min(1, 'Please provide an email address').email('Please enter a valid email address.'),
 })
 
 const codeSchema = z.object({
