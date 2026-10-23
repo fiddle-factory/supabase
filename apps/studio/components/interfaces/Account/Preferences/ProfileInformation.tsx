@@ -196,6 +196,7 @@ export const ProfileInformation = () => {
                 <Button
                   variant="primary"
                   type="submit"
+                  className="bg-brand-400 dark:bg-brand-500 hover:bg-brand-500 dark:hover:bg-brand-600 data-[state=open]:bg-brand-500 text-foreground"
                   loading={isUpdatingProfile || isIdentitiesLoading}
                   disabled={!form.formState.isDirty}
                 >
