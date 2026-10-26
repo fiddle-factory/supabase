@@ -1,7 +1,6 @@
 @import 'config/tailwind.config.css';
 @import 'config/inline-code.css';
 @import 'config/typography.css';
-@import "../../../.fiddle/safelist.css";
 
 @source '../pages/**/*.{js,ts,jsx,tsx}';
 @source '../components/**/*.{js,ts,jsx,tsx}';
