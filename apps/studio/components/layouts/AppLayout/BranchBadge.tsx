@@ -26,14 +26,14 @@ export function BranchBadge({ branch, isBranchingEnabled }: BranchBadgeProps) {
 
   if (branch?.persistent) {
     return (
-      <Badge variant="success" className="mt-px">
+      <Badge variant="success" className="mt-px text-brand-500">
         Persistent
       </Badge>
     )
   }
 
   return (
-    <Badge variant="success" className="mt-px">
+    <Badge variant="success" className="mt-px text-brand-500">
       Preview
     </Badge>
   )
