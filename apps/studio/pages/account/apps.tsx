@@ -36,7 +36,7 @@ const UserOAuthApps: NextPageWithLayout = () => {
       <PageHeader size="small">
         <PageHeaderMeta>
           <PageHeaderSummary>
-            <PageHeaderTitle>OAuth Apps</PageHeaderTitle>
+            <PageHeaderTitle>OAuth App</PageHeaderTitle>
             <PageHeaderDescription>View and manage your personal grants</PageHeaderDescription>
           </PageHeaderSummary>
         </PageHeaderMeta>
