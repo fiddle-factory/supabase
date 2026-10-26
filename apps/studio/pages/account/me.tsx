@@ -55,7 +55,7 @@ const PreferencesPageHeader = ({ description }: { description: string }) => (
   <PageHeader size="small">
     <PageHeaderMeta>
       <PageHeaderSummary>
-        <PageHeaderTitle>Preferences Local A</PageHeaderTitle>
+        <PageHeaderTitle>Preferences Local C</PageHeaderTitle>
         <PageHeaderDescription>{description}</PageHeaderDescription>
       </PageHeaderSummary>
     </PageHeaderMeta>
