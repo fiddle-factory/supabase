@@ -55,7 +55,7 @@ const PreferencesPageHeader = ({ description }: { description: string }) => (
   <PageHeader size="small">
     <PageHeaderMeta>
       <PageHeaderSummary>
-        <PageHeaderTitle>QA Restart Reuse Verified</PageHeaderTitle>
+        <PageHeaderTitle>QA Source Independent Verified</PageHeaderTitle>
         <PageHeaderDescription>{description}</PageHeaderDescription>
       </PageHeaderSummary>
     </PageHeaderMeta>
@@ -82,7 +82,7 @@ const PlatformPreferences = () => {
 
   return (
     <>
-      <PreferencesPageHeader description="Manage your account profile, connections, and dashboard experience." />
+      <PreferencesPageHeader description="Source frame edited independently." />
       <PageContainer size="small">
         {isError && (
           <Card>
