@@ -120,7 +120,7 @@ export const SortableTab = ({
                 </motion.span>
               )}
             </AnimatePresence>
-            <span>{tab.label || 'Untitled'}</span>
+            <span className="font-bold">{tab.label || 'Untitled'}</span>
           </div>
           {/* Reserve status/close slot width; close is a sibling overlay, not nested. */}
           <div
