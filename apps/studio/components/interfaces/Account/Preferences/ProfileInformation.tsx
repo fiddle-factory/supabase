@@ -40,7 +40,12 @@ const FormSchema = z.object({
 
 const formId = 'profile-information-form'
 
-export const ProfileInformation = () => {
+type ProfileInformationProps = {
+  /** Optionally render the first and last name fields as read-only (off by default) */
+  disableNameFields?: boolean
+}
+
+export const ProfileInformation = ({ disableNameFields = false }: ProfileInformationProps) => {
   const { profile } = useProfile()
 
   const {
@@ -105,7 +110,12 @@ export const ProfileInformation = () => {
                   render={({ field }) => (
                     <FormItemLayout label="First name" layout="flex-row-reverse">
                       <FormControl className="col-span-8">
-                        <Input {...field} placeholder="First name" className="w-full" />
+                        <Input
+                          {...field}
+                          placeholder="First name"
+                          className="w-full"
+                          disabled={disableNameFields}
+                        />
                       </FormControl>
                     </FormItemLayout>
                   )}
@@ -118,7 +128,12 @@ export const ProfileInformation = () => {
                   render={({ field }) => (
                     <FormItemLayout label="Last name" layout="flex-row-reverse">
                       <FormControl className="col-span-8">
-                        <Input {...field} placeholder="Last name" className="w-full" />
+                        <Input
+                          {...field}
+                          placeholder="Last name"
+                          className="w-full"
+                          disabled={disableNameFields}
+                        />
                       </FormControl>
                     </FormItemLayout>
                   )}

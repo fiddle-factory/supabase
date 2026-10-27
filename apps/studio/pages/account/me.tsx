@@ -40,11 +40,19 @@ import type { NextPageWithLayout } from '@/types'
 type UserPreferencesProps = {
   /** Optional notice rendered directly above the profile information form */
   profileNotice?: ReactNode
+  /** Optionally disable the first and last name fields of the profile form (off by default) */
+  disableProfileNameFields?: boolean
 }
 
-const User: NextPageWithLayout<UserPreferencesProps> = ({ profileNotice }) => {
+const User: NextPageWithLayout<UserPreferencesProps> = ({
+  profileNotice,
+  disableProfileNameFields,
+}) => {
   return IS_PLATFORM ? (
-    <PlatformPreferences profileNotice={profileNotice} />
+    <PlatformPreferences
+      profileNotice={profileNotice}
+      disableProfileNameFields={disableProfileNameFields}
+    />
   ) : (
     <SelfHostedPreferences />
   )
@@ -71,7 +79,10 @@ const PreferencesPageHeader = ({ description }: { description: string }) => (
   </PageHeader>
 )
 
-const PlatformPreferences = ({ profileNotice }: UserPreferencesProps) => {
+const PlatformPreferences = ({
+  profileNotice,
+  disableProfileNameFields = false,
+}: UserPreferencesProps) => {
   const router = useRouter()
 
   const { profileShowInformation, profileShowAnalyticsAndMarketing, profileShowAccountDeletion } =
@@ -110,7 +121,7 @@ const PlatformPreferences = ({ profileNotice }: UserPreferencesProps) => {
                 {profileShowInformation ? (
                   <>
                     {profileNotice}
-                    <ProfileInformation />
+                    <ProfileInformation disableNameFields={disableProfileNameFields} />
                   </>
                 ) : null}
                 <AccountIdentities />
