@@ -17,7 +17,7 @@ export const AccessTokensLayout = ({ children }: PropsWithChildren) => {
       <PageHeader size="small">
         <PageHeaderMeta>
           <PageHeaderSummary>
-            <PageHeaderTitle>{title}</PageHeaderTitle>
+            <PageHeaderTitle className="font-bold text-primary-bright">{title}</PageHeaderTitle>
             <PageHeaderDescription>{description}</PageHeaderDescription>
           </PageHeaderSummary>
         </PageHeaderMeta>
