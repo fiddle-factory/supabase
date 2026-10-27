@@ -40,13 +40,15 @@ import type { NextPageWithLayout } from '@/types'
 type UserPreferencesProps = {
   /** Optional notice rendered directly above the profile information form */
   profileNotice?: ReactNode
+  /** Optional text rendered directly below the page heading */
+  headingNote?: ReactNode
 }
 
-const User: NextPageWithLayout<UserPreferencesProps> = ({ profileNotice }) => {
+const User: NextPageWithLayout<UserPreferencesProps> = ({ profileNotice, headingNote }) => {
   return IS_PLATFORM ? (
-    <PlatformPreferences profileNotice={profileNotice} />
+    <PlatformPreferences profileNotice={profileNotice} headingNote={headingNote} />
   ) : (
-    <SelfHostedPreferences />
+    <SelfHostedPreferences headingNote={headingNote} />
   )
 }
 
@@ -60,18 +62,25 @@ User.getLayout = (page) => (
 
 export default User
 
-const PreferencesPageHeader = ({ description }: { description: string }) => (
+const PreferencesPageHeader = ({
+  description,
+  headingNote,
+}: {
+  description: string
+  headingNote?: ReactNode
+}) => (
   <PageHeader size="small">
     <PageHeaderMeta>
       <PageHeaderSummary>
         <PageHeaderTitle>QA Parallel Copy C</PageHeaderTitle>
+        {headingNote ? <p className="text-sm text-foreground">{headingNote}</p> : null}
         <PageHeaderDescription>{description}</PageHeaderDescription>
       </PageHeaderSummary>
     </PageHeaderMeta>
   </PageHeader>
 )
 
-const PlatformPreferences = ({ profileNotice }: UserPreferencesProps) => {
+const PlatformPreferences = ({ profileNotice, headingNote }: UserPreferencesProps) => {
   const router = useRouter()
 
   const { profileShowInformation, profileShowAnalyticsAndMarketing, profileShowAccountDeletion } =
@@ -91,7 +100,10 @@ const PlatformPreferences = ({ profileNotice }: UserPreferencesProps) => {
 
   return (
     <>
-      <PreferencesPageHeader description="Copy C has a separate saved revision." />
+      <PreferencesPageHeader
+        description="Copy C has a separate saved revision."
+        headingNote={headingNote}
+      />
       <PageContainer size="small">
         {isError && (
           <Card>
@@ -212,10 +224,13 @@ const ProfileFieldLoadingRow = ({
   </div>
 )
 
-const SelfHostedPreferences = () => {
+const SelfHostedPreferences = ({ headingNote }: Pick<UserPreferencesProps, 'headingNote'>) => {
   return (
     <>
-      <PreferencesPageHeader description="Copy C has a separate saved revision." />
+      <PreferencesPageHeader
+        description="Copy C has a separate saved revision."
+        headingNote={headingNote}
+      />
       <PageContainer size="small">
         <ThemeSettings />
 
