@@ -40,13 +40,15 @@ import type { NextPageWithLayout } from '@/types'
 type PreferencesProps = {
   /** Shows the profile form in a compact two-column layout. */
   compact?: boolean
+  /** Optional line shown just below the page heading (story-only). */
+  headingNote?: string
 }
 
-const User: NextPageWithLayout<PreferencesProps> = ({ compact = false }) => {
+const User: NextPageWithLayout<PreferencesProps> = ({ compact = false, headingNote }) => {
   return IS_PLATFORM ? (
-    <PlatformPreferences compact={compact} />
+    <PlatformPreferences compact={compact} headingNote={headingNote} />
   ) : (
-    <SelfHostedPreferences compact={compact} />
+    <SelfHostedPreferences compact={compact} headingNote={headingNote} />
   )
 }
 
@@ -63,9 +65,11 @@ export default User
 const PreferencesPageHeader = ({
   description,
   label,
+  headingNote,
 }: {
   description: string
   label?: string
+  headingNote?: string
 }) => (
   <PageHeader size="small">
     <PageHeaderMeta>
@@ -78,6 +82,7 @@ const PreferencesPageHeader = ({
         ) : (
           <PageHeaderTitle>QA Parallel Copy B</PageHeaderTitle>
         )}
+        {headingNote ? <p className="text-sm text-foreground">{headingNote}</p> : null}
         <PageHeaderDescription>{description}</PageHeaderDescription>
       </PageHeaderSummary>
     </PageHeaderMeta>
@@ -86,7 +91,7 @@ const PreferencesPageHeader = ({
 
 const COMPACT_LABEL = 'QA compact variant'
 
-const PlatformPreferences = ({ compact = false }: PreferencesProps) => {
+const PlatformPreferences = ({ compact = false, headingNote }: PreferencesProps) => {
   const router = useRouter()
 
   const { profileShowInformation, profileShowAnalyticsAndMarketing, profileShowAccountDeletion } =
@@ -109,6 +114,7 @@ const PlatformPreferences = ({ compact = false }: PreferencesProps) => {
       <PreferencesPageHeader
         description="Copy B has an independent saved revision."
         label={compact ? COMPACT_LABEL : undefined}
+        headingNote={headingNote}
       />
       <PageContainer size="small">
         {isError && (
@@ -225,12 +231,13 @@ const ProfileFieldLoadingRow = ({
   </div>
 )
 
-const SelfHostedPreferences = ({ compact = false }: PreferencesProps) => {
+const SelfHostedPreferences = ({ compact = false, headingNote }: PreferencesProps) => {
   return (
     <>
       <PreferencesPageHeader
         description="Copy B has an independent saved revision."
         label={compact ? COMPACT_LABEL : undefined}
+        headingNote={headingNote}
       />
       <PageContainer size="small">
         <ThemeSettings />
