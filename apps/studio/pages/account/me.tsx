@@ -55,7 +55,7 @@ const PreferencesPageHeader = ({ description }: { description: string }) => (
   <PageHeader size="small">
     <PageHeaderMeta>
       <PageHeaderSummary>
-        <PageHeaderTitle>QA Fresh First Edit Verified</PageHeaderTitle>
+        <PageHeaderTitle>QA Fresh Repeated Edit Verified</PageHeaderTitle>
         <PageHeaderDescription>{description}</PageHeaderDescription>
       </PageHeaderSummary>
     </PageHeaderMeta>
