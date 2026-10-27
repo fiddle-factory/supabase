@@ -55,7 +55,7 @@ const PreferencesPageHeader = ({ description }: { description: string }) => (
   <PageHeader size="small">
     <PageHeaderMeta>
       <PageHeaderSummary>
-        <PageHeaderTitle>QA Fresh Repeated Edit Verified</PageHeaderTitle>
+        <PageHeaderTitle>QA Parallel Copy C</PageHeaderTitle>
         <PageHeaderDescription>{description}</PageHeaderDescription>
       </PageHeaderSummary>
     </PageHeaderMeta>
@@ -82,7 +82,7 @@ const PlatformPreferences = () => {
 
   return (
     <>
-      <PreferencesPageHeader description="Manage your account profile, connections, and dashboard experience." />
+      <PreferencesPageHeader description="Copy C has a separate saved revision." />
       <PageContainer size="small">
         {isError && (
           <Card>
@@ -201,7 +201,7 @@ const ProfileFieldLoadingRow = ({
 const SelfHostedPreferences = () => {
   return (
     <>
-      <PreferencesPageHeader description="Manage how the dashboard looks and behaves on this browser and device." />
+      <PreferencesPageHeader description="Copy C has a separate saved revision." />
       <PageContainer size="small">
         <ThemeSettings />
 
