@@ -1,6 +1,9 @@
 import { useIntersectionObserver } from '@uidotdev/usehooks'
+import { AppWindowIcon, PlusIcon } from 'lucide-react'
+import Link from 'next/link'
 import { Fragment, useEffect } from 'react'
-import { Card, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'ui'
+import { Button, Card, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'ui'
+import { EmptyStatePresentational } from 'ui-patterns/EmptyStatePresentational'
 import {
   PageSection,
   PageSectionContent,
@@ -39,6 +42,8 @@ export const OAuthApps = () => {
     }
   }, [hasNextPage, entry?.isIntersecting, fetchNextPage])
 
+  const isEmpty = isSuccess && (data.pages.length === 0 || data.pages[0].data.length === 0)
+
   return (
     <PageSection id="authorized-apps">
       <PageSectionMeta>
@@ -61,7 +66,19 @@ export const OAuthApps = () => {
 
         {isError && <AlertError subject="Failed to retrieve authorized apps" error={error} />}
 
-        {isSuccess && (
+        {isEmpty && (
+          <EmptyStatePresentational
+            icon={AppWindowIcon}
+            title="No apps yet"
+            description="Apps you authorize to access your organizations and projects will appear here."
+          >
+            <Button asChild variant="primary" icon={<PlusIcon size={14} />}>
+              <Link href="/org/_/apps">Create app</Link>
+            </Button>
+          </EmptyStatePresentational>
+        )}
+
+        {isSuccess && !isEmpty && (
           <Card>
             <Table>
               <TableHeader>
@@ -75,32 +92,20 @@ export const OAuthApps = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.pages.length === 0 || data.pages[0].data.length === 0 ? (
-                  <TableRow className="[&>td]:hover:bg-inherit">
-                    <TableCell colSpan={4}>
-                      <p className="text-sm text-foreground-lighter">
-                        No apps have been authorized in this organization yet.
-                      </p>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  <>
-                    {data.pages.map((page, pageIndex) => (
-                      <Fragment key={pageIndex}>
-                        {page.data.map((grant) => (
-                          <GrantRow key={grant.grant_id} grant={grant} />
-                        ))}
-                      </Fragment>
+                {data.pages.map((page, pageIndex) => (
+                  <Fragment key={pageIndex}>
+                    {page.data.map((grant) => (
+                      <GrantRow key={grant.grant_id} grant={grant} />
                     ))}
-                    <TableRow ref={sentinelRef} className="[&>td]:hover:bg-inherit">
-                      <TableCell colSpan={4} className={isFetchingNextPage ? '' : 'p-0 hidden'}>
-                        <p aria-live="polite" className="text-sm text-foreground-lighter">
-                          {isFetchingNextPage ? 'Loading...' : ''}
-                        </p>
-                      </TableCell>
-                    </TableRow>
-                  </>
-                )}
+                  </Fragment>
+                ))}
+                <TableRow ref={sentinelRef} className="[&>td]:hover:bg-inherit">
+                  <TableCell colSpan={4} className={isFetchingNextPage ? '' : 'p-0 hidden'}>
+                    <p aria-live="polite" className="text-sm text-foreground-lighter">
+                      {isFetchingNextPage ? 'Loading...' : ''}
+                    </p>
+                  </TableCell>
+                </TableRow>
               </TableBody>
             </Table>
           </Card>
