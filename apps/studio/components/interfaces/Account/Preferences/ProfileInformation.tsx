@@ -91,7 +91,7 @@ export const ProfileInformation = () => {
     <PageSection>
       <PageSectionMeta>
         <PageSectionSummary>
-          <PageSectionTitle>Profile information</PageSectionTitle>
+          <PageSectionTitle>PR1409 QA interrupted edit</PageSectionTitle>
         </PageSectionSummary>
       </PageSectionMeta>
       <PageSectionContent>
