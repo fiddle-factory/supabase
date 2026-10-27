@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { Card, CardContent, CardFooter } from 'ui'
 import { PageContainer } from 'ui-patterns/PageContainer'
 import {
@@ -37,8 +37,17 @@ import { IS_PLATFORM } from '@/lib/constants'
 import { useProfile } from '@/lib/profile'
 import type { NextPageWithLayout } from '@/types'
 
-const User: NextPageWithLayout = () => {
-  return IS_PLATFORM ? <PlatformPreferences /> : <SelfHostedPreferences />
+type UserPreferencesProps = {
+  /** Optional notice rendered directly above the profile information form */
+  profileNotice?: ReactNode
+}
+
+const User: NextPageWithLayout<UserPreferencesProps> = ({ profileNotice }) => {
+  return IS_PLATFORM ? (
+    <PlatformPreferences profileNotice={profileNotice} />
+  ) : (
+    <SelfHostedPreferences />
+  )
 }
 
 User.getLayout = (page) => (
@@ -62,7 +71,7 @@ const PreferencesPageHeader = ({ description }: { description: string }) => (
   </PageHeader>
 )
 
-const PlatformPreferences = () => {
+const PlatformPreferences = ({ profileNotice }: UserPreferencesProps) => {
   const router = useRouter()
 
   const { profileShowInformation, profileShowAnalyticsAndMarketing, profileShowAccountDeletion } =
@@ -98,7 +107,12 @@ const PlatformPreferences = () => {
               <ProfileLoadingSections showProfileInformation={profileShowInformation} />
             ) : (
               <>
-                {profileShowInformation ? <ProfileInformation /> : null}
+                {profileShowInformation ? (
+                  <>
+                    {profileNotice}
+                    <ProfileInformation />
+                  </>
+                ) : null}
                 <AccountIdentities />
               </>
             )}
