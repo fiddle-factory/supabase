@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
-import { Card, CardContent, CardFooter } from 'ui'
+import { Badge, Card, CardContent, CardFooter } from 'ui'
 import { PageContainer } from 'ui-patterns/PageContainer'
 import {
   PageHeader,
@@ -37,8 +37,17 @@ import { IS_PLATFORM } from '@/lib/constants'
 import { useProfile } from '@/lib/profile'
 import type { NextPageWithLayout } from '@/types'
 
-const User: NextPageWithLayout = () => {
-  return IS_PLATFORM ? <PlatformPreferences /> : <SelfHostedPreferences />
+type PreferencesProps = {
+  /** Shows the profile form in a compact two-column layout. */
+  compact?: boolean
+}
+
+const User: NextPageWithLayout<PreferencesProps> = ({ compact = false }) => {
+  return IS_PLATFORM ? (
+    <PlatformPreferences compact={compact} />
+  ) : (
+    <SelfHostedPreferences compact={compact} />
+  )
 }
 
 User.getLayout = (page) => (
@@ -51,18 +60,33 @@ User.getLayout = (page) => (
 
 export default User
 
-const PreferencesPageHeader = ({ description }: { description: string }) => (
+const PreferencesPageHeader = ({
+  description,
+  label,
+}: {
+  description: string
+  label?: string
+}) => (
   <PageHeader size="small">
     <PageHeaderMeta>
       <PageHeaderSummary>
-        <PageHeaderTitle>QA Parallel Copy B</PageHeaderTitle>
+        {label ? (
+          <div className="flex items-center gap-2">
+            <PageHeaderTitle>QA Parallel Copy B</PageHeaderTitle>
+            <Badge>{label}</Badge>
+          </div>
+        ) : (
+          <PageHeaderTitle>QA Parallel Copy B</PageHeaderTitle>
+        )}
         <PageHeaderDescription>{description}</PageHeaderDescription>
       </PageHeaderSummary>
     </PageHeaderMeta>
   </PageHeader>
 )
 
-const PlatformPreferences = () => {
+const COMPACT_LABEL = 'QA compact variant'
+
+const PlatformPreferences = ({ compact = false }: PreferencesProps) => {
   const router = useRouter()
 
   const { profileShowInformation, profileShowAnalyticsAndMarketing, profileShowAccountDeletion } =
@@ -82,7 +106,10 @@ const PlatformPreferences = () => {
 
   return (
     <>
-      <PreferencesPageHeader description="Copy B has an independent saved revision." />
+      <PreferencesPageHeader
+        description="Copy B has an independent saved revision."
+        label={compact ? COMPACT_LABEL : undefined}
+      />
       <PageContainer size="small">
         {isError && (
           <Card>
@@ -98,7 +125,7 @@ const PlatformPreferences = () => {
               <ProfileLoadingSections showProfileInformation={profileShowInformation} />
             ) : (
               <>
-                {profileShowInformation ? <ProfileInformation /> : null}
+                {profileShowInformation ? <ProfileInformation compact={compact} /> : null}
                 <AccountIdentities />
               </>
             )}
@@ -198,10 +225,13 @@ const ProfileFieldLoadingRow = ({
   </div>
 )
 
-const SelfHostedPreferences = () => {
+const SelfHostedPreferences = ({ compact = false }: PreferencesProps) => {
   return (
     <>
-      <PreferencesPageHeader description="Copy B has an independent saved revision." />
+      <PreferencesPageHeader
+        description="Copy B has an independent saved revision."
+        label={compact ? COMPACT_LABEL : undefined}
+      />
       <PageContainer size="small">
         <ThemeSettings />
 

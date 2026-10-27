@@ -40,7 +40,12 @@ const FormSchema = z.object({
 
 const formId = 'profile-information-form'
 
-export const ProfileInformation = () => {
+interface ProfileInformationProps {
+  /** Renders the fields in a compact two-column grid inside a single card section. */
+  compact?: boolean
+}
+
+export const ProfileInformation = ({ compact = false }: ProfileInformationProps) => {
   const { profile } = useProfile()
 
   const {
@@ -87,6 +92,107 @@ export const ProfileInformation = () => {
     })
   }
 
+  const fieldLayout = compact ? 'vertical' : 'flex-row-reverse'
+  const FieldContainer = compact ? 'div' : CardContent
+
+  const fields = (
+    <>
+      <FieldContainer>
+        <FormField
+          control={form.control}
+          name="first_name"
+          render={({ field }) => (
+            <FormItemLayout label="First name" layout={fieldLayout}>
+              <FormControl className="col-span-8">
+                <Input {...field} placeholder="First name" className="w-full" />
+              </FormControl>
+            </FormItemLayout>
+          )}
+        />
+      </FieldContainer>
+      <FieldContainer>
+        <FormField
+          control={form.control}
+          name="last_name"
+          render={({ field }) => (
+            <FormItemLayout label="Last name" layout={fieldLayout}>
+              <FormControl className="col-span-8">
+                <Input {...field} placeholder="Last name" className="w-full" />
+              </FormControl>
+            </FormItemLayout>
+          )}
+        />
+      </FieldContainer>
+      <FieldContainer>
+        <FormField
+          control={form.control}
+          name="primary_email"
+          render={({ field }) => (
+            <FormItemLayout
+              label="Primary email"
+              description={
+                profile?.is_sso_user
+                  ? 'Managed by your SSO provider and cannot be changed here'
+                  : 'Used for account notifications'
+              }
+              layout={fieldLayout}
+            >
+              <FormControl className="col-span-8">
+                <div className="flex flex-col gap-1">
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    disabled={profile?.is_sso_user}
+                  >
+                    <SelectTrigger className="col-span-8 w-full">
+                      <SelectValue placeholder="Select primary email" />
+                    </SelectTrigger>
+                    <SelectContent className="col-span-8">
+                      {isIdentitiesSuccess &&
+                        dedupedIdentityEmails.map((email) => (
+                          <SelectItem key={email} value={email}>
+                            {email}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </FormControl>
+            </FormItemLayout>
+          )}
+        />
+      </FieldContainer>
+      <FieldContainer>
+        <FormField
+          control={form.control}
+          name="username"
+          render={({ field }) => (
+            <FormItemLayout
+              label="Username"
+              description={
+                profile?.is_sso_user
+                  ? 'Managed by your SSO provider and cannot be changed here'
+                  : 'Display name used across dashboard'
+              }
+              layout={fieldLayout}
+            >
+              <FormControl className="col-span-8">
+                <div className="flex flex-col gap-1">
+                  <Input
+                    {...field}
+                    className="w-full"
+                    placeholder="Username"
+                    disabled={profile?.is_sso_user}
+                  />
+                </div>
+              </FormControl>
+            </FormItemLayout>
+          )}
+        />
+      </FieldContainer>
+    </>
+  )
+
   return (
     <PageSection>
       <PageSectionMeta>
@@ -98,99 +204,11 @@ export const ProfileInformation = () => {
         <Form {...form}>
           <form id={formId} className="space-y-6 w-full" onSubmit={form.handleSubmit(onSubmit)}>
             <Card>
-              <CardContent>
-                <FormField
-                  control={form.control}
-                  name="first_name"
-                  render={({ field }) => (
-                    <FormItemLayout label="First name" layout="flex-row-reverse">
-                      <FormControl className="col-span-8">
-                        <Input {...field} placeholder="First name" className="w-full" />
-                      </FormControl>
-                    </FormItemLayout>
-                  )}
-                />
-              </CardContent>
-              <CardContent>
-                <FormField
-                  control={form.control}
-                  name="last_name"
-                  render={({ field }) => (
-                    <FormItemLayout label="Last name" layout="flex-row-reverse">
-                      <FormControl className="col-span-8">
-                        <Input {...field} placeholder="Last name" className="w-full" />
-                      </FormControl>
-                    </FormItemLayout>
-                  )}
-                />
-              </CardContent>
-              <CardContent>
-                <FormField
-                  control={form.control}
-                  name="primary_email"
-                  render={({ field }) => (
-                    <FormItemLayout
-                      label="Primary email"
-                      description={
-                        profile?.is_sso_user
-                          ? 'Managed by your SSO provider and cannot be changed here'
-                          : 'Used for account notifications'
-                      }
-                      layout="flex-row-reverse"
-                    >
-                      <FormControl className="col-span-8">
-                        <div className="flex flex-col gap-1">
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            disabled={profile?.is_sso_user}
-                          >
-                            <SelectTrigger className="col-span-8 w-full">
-                              <SelectValue placeholder="Select primary email" />
-                            </SelectTrigger>
-                            <SelectContent className="col-span-8">
-                              {isIdentitiesSuccess &&
-                                dedupedIdentityEmails.map((email) => (
-                                  <SelectItem key={email} value={email}>
-                                    {email}
-                                  </SelectItem>
-                                ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </FormControl>
-                    </FormItemLayout>
-                  )}
-                />
-              </CardContent>
-              <CardContent>
-                <FormField
-                  control={form.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItemLayout
-                      label="Username"
-                      description={
-                        profile?.is_sso_user
-                          ? 'Managed by your SSO provider and cannot be changed here'
-                          : 'Display name used across dashboard'
-                      }
-                      layout="flex-row-reverse"
-                    >
-                      <FormControl className="col-span-8">
-                        <div className="flex flex-col gap-1">
-                          <Input
-                            {...field}
-                            className="w-full"
-                            placeholder="Username"
-                            disabled={profile?.is_sso_user}
-                          />
-                        </div>
-                      </FormControl>
-                    </FormItemLayout>
-                  )}
-                />
-              </CardContent>
+              {compact ? (
+                <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">{fields}</CardContent>
+              ) : (
+                fields
+              )}
               <CardFooter className="justify-end space-x-2">
                 {form.formState.isDirty && <Button onClick={() => form.reset()}>Cancel</Button>}
                 <Button
