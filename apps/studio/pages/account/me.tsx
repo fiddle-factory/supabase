@@ -42,19 +42,23 @@ type UserPreferencesProps = {
   profileNotice?: ReactNode
   /** Optionally disable the first and last name fields of the profile form (off by default) */
   disableProfileNameFields?: boolean
+  /** Optional content rendered directly below the page heading (off by default) */
+  headingNote?: ReactNode
 }
 
 const User: NextPageWithLayout<UserPreferencesProps> = ({
   profileNotice,
   disableProfileNameFields,
+  headingNote,
 }) => {
   return IS_PLATFORM ? (
     <PlatformPreferences
       profileNotice={profileNotice}
       disableProfileNameFields={disableProfileNameFields}
+      headingNote={headingNote}
     />
   ) : (
-    <SelfHostedPreferences />
+    <SelfHostedPreferences headingNote={headingNote} />
   )
 }
 
@@ -68,11 +72,18 @@ User.getLayout = (page) => (
 
 export default User
 
-const PreferencesPageHeader = ({ description }: { description: string }) => (
+const PreferencesPageHeader = ({
+  description,
+  headingNote,
+}: {
+  description: string
+  headingNote?: ReactNode
+}) => (
   <PageHeader size="small">
     <PageHeaderMeta>
       <PageHeaderSummary>
         <PageHeaderTitle>QA Parallel Copy C</PageHeaderTitle>
+        {headingNote}
         <PageHeaderDescription>{description}</PageHeaderDescription>
       </PageHeaderSummary>
     </PageHeaderMeta>
@@ -82,6 +93,7 @@ const PreferencesPageHeader = ({ description }: { description: string }) => (
 const PlatformPreferences = ({
   profileNotice,
   disableProfileNameFields = false,
+  headingNote,
 }: UserPreferencesProps) => {
   const router = useRouter()
 
@@ -102,7 +114,10 @@ const PlatformPreferences = ({
 
   return (
     <>
-      <PreferencesPageHeader description="Copy C has a separate saved revision." />
+      <PreferencesPageHeader
+        description="Copy C has a separate saved revision."
+        headingNote={headingNote}
+      />
       <PageContainer size="small">
         {isError && (
           <Card>
@@ -223,10 +238,13 @@ const ProfileFieldLoadingRow = ({
   </div>
 )
 
-const SelfHostedPreferences = () => {
+const SelfHostedPreferences = ({ headingNote }: Pick<UserPreferencesProps, 'headingNote'>) => {
   return (
     <>
-      <PreferencesPageHeader description="Copy C has a separate saved revision." />
+      <PreferencesPageHeader
+        description="Copy C has a separate saved revision."
+        headingNote={headingNote}
+      />
       <PageContainer size="small">
         <ThemeSettings />
 
