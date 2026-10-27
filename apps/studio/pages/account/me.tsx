@@ -40,11 +40,13 @@ import type { NextPageWithLayout } from '@/types'
 type PreferencesProps = {
   /** Shows the profile form in a compact two-column layout. */
   compact?: boolean
+  /** Highlights the profile card with a verified label and brand border. */
+  highlighted?: boolean
 }
 
-const User: NextPageWithLayout<PreferencesProps> = ({ compact = false }) => {
+const User: NextPageWithLayout<PreferencesProps> = ({ compact = false, highlighted = false }) => {
   return IS_PLATFORM ? (
-    <PlatformPreferences compact={compact} />
+    <PlatformPreferences compact={compact} highlighted={highlighted} />
   ) : (
     <SelfHostedPreferences compact={compact} />
   )
@@ -86,7 +88,7 @@ const PreferencesPageHeader = ({
 
 const COMPACT_LABEL = 'QA compact variant'
 
-const PlatformPreferences = ({ compact = false }: PreferencesProps) => {
+const PlatformPreferences = ({ compact = false, highlighted = false }: PreferencesProps) => {
   const router = useRouter()
 
   const { profileShowInformation, profileShowAnalyticsAndMarketing, profileShowAccountDeletion } =
@@ -125,7 +127,7 @@ const PlatformPreferences = ({ compact = false }: PreferencesProps) => {
               <ProfileLoadingSections showProfileInformation={profileShowInformation} />
             ) : (
               <>
-                {profileShowInformation ? <ProfileInformation compact={compact} /> : null}
+                {profileShowInformation ? <ProfileInformation compact={compact} highlighted={highlighted} /> : null}
                 <AccountIdentities />
               </>
             )}

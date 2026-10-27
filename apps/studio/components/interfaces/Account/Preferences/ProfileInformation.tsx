@@ -3,6 +3,7 @@ import { groupBy } from 'lodash'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import {
+  Badge,
   Button,
   Card,
   CardContent,
@@ -43,9 +44,14 @@ const formId = 'profile-information-form'
 interface ProfileInformationProps {
   /** Renders the fields in a compact two-column grid inside a single card section. */
   compact?: boolean
+  /** Shows a verified label and a brand-colored border around the profile card. */
+  highlighted?: boolean
 }
 
-export const ProfileInformation = ({ compact = false }: ProfileInformationProps) => {
+export const ProfileInformation = ({
+  compact = false,
+  highlighted = false,
+}: ProfileInformationProps) => {
   const { profile } = useProfile()
 
   const {
@@ -198,12 +204,17 @@ export const ProfileInformation = ({ compact = false }: ProfileInformationProps)
       <PageSectionMeta>
         <PageSectionSummary>
           <PageSectionTitle>Profile information</PageSectionTitle>
+          {highlighted && (
+            <div>
+              <Badge variant="success">QA highlighted verified</Badge>
+            </div>
+          )}
         </PageSectionSummary>
       </PageSectionMeta>
       <PageSectionContent>
         <Form {...form}>
           <form id={formId} className="space-y-6 w-full" onSubmit={form.handleSubmit(onSubmit)}>
-            <Card>
+            <Card className={highlighted ? 'border-brand-500' : undefined}>
               {compact ? (
                 <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">{fields}</CardContent>
               ) : (
