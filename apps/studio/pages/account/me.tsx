@@ -40,13 +40,18 @@ import type { NextPageWithLayout } from '@/types'
 type PreferencesProps = {
   /** Shows the profile form in a compact two-column layout. */
   compact?: boolean
+  /** Story-only: shows the "QA recovery batch" line below the page heading. */
+  showRecoveryBatch?: boolean
 }
 
-const User: NextPageWithLayout<PreferencesProps> = ({ compact = false }) => {
+const User: NextPageWithLayout<PreferencesProps> = ({
+  compact = false,
+  showRecoveryBatch = false,
+}) => {
   return IS_PLATFORM ? (
-    <PlatformPreferences compact={compact} />
+    <PlatformPreferences compact={compact} showRecoveryBatch={showRecoveryBatch} />
   ) : (
-    <SelfHostedPreferences compact={compact} />
+    <SelfHostedPreferences compact={compact} showRecoveryBatch={showRecoveryBatch} />
   )
 }
 
@@ -63,9 +68,11 @@ export default User
 const PreferencesPageHeader = ({
   description,
   label,
+  showRecoveryBatch = false,
 }: {
   description: string
   label?: string
+  showRecoveryBatch?: boolean
 }) => (
   <PageHeader size="small">
     <PageHeaderMeta>
@@ -78,6 +85,7 @@ const PreferencesPageHeader = ({
         ) : (
           <PageHeaderTitle>QA Parallel Copy B</PageHeaderTitle>
         )}
+        {showRecoveryBatch && <p className="text-sm text-foreground-light">QA recovery batch</p>}
         <PageHeaderDescription>{description}</PageHeaderDescription>
       </PageHeaderSummary>
     </PageHeaderMeta>
@@ -86,7 +94,7 @@ const PreferencesPageHeader = ({
 
 const COMPACT_LABEL = 'QA queued recovery B'
 
-const PlatformPreferences = ({ compact = false }: PreferencesProps) => {
+const PlatformPreferences = ({ compact = false, showRecoveryBatch = false }: PreferencesProps) => {
   const router = useRouter()
 
   const { profileShowInformation, profileShowAnalyticsAndMarketing, profileShowAccountDeletion } =
@@ -109,6 +117,7 @@ const PlatformPreferences = ({ compact = false }: PreferencesProps) => {
       <PreferencesPageHeader
         description="Copy B has an independent saved revision."
         label={compact ? COMPACT_LABEL : undefined}
+        showRecoveryBatch={showRecoveryBatch}
       />
       <PageContainer size="small">
         {isError && (
@@ -225,12 +234,13 @@ const ProfileFieldLoadingRow = ({
   </div>
 )
 
-const SelfHostedPreferences = ({ compact = false }: PreferencesProps) => {
+const SelfHostedPreferences = ({ compact = false, showRecoveryBatch = false }: PreferencesProps) => {
   return (
     <>
       <PreferencesPageHeader
         description="Copy B has an independent saved revision."
         label={compact ? COMPACT_LABEL : undefined}
+        showRecoveryBatch={showRecoveryBatch}
       />
       <PageContainer size="small">
         <ThemeSettings />
