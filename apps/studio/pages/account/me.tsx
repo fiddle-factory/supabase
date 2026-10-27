@@ -84,7 +84,7 @@ const PreferencesPageHeader = ({
   </PageHeader>
 )
 
-const COMPACT_LABEL = 'QA compact variant'
+const COMPACT_LABEL = 'QA reload probe B'
 
 const PlatformPreferences = ({ compact = false }: PreferencesProps) => {
   const router = useRouter()
