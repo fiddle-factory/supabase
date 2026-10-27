@@ -40,7 +40,7 @@ const MfaPage: NextPageWithLayout = () => {
       <PageHeader size="default">
         <PageHeaderMeta>
           <PageHeaderSummary>
-            <PageHeaderTitle>Multi-Factor Authentication (MFA)</PageHeaderTitle>
+            <PageHeaderTitle>MFA</PageHeaderTitle>
             <PageHeaderDescription>
               Requires users to provide additional verification factors to authenticate
             </PageHeaderDescription>
