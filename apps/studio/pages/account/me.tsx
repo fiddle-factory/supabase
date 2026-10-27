@@ -84,7 +84,7 @@ const PreferencesPageHeader = ({
   </PageHeader>
 )
 
-const COMPACT_LABEL = 'QA recovery verified B'
+const COMPACT_LABEL = 'QA repeated recovery B'
 
 const PlatformPreferences = ({ compact = false }: PreferencesProps) => {
   const router = useRouter()
