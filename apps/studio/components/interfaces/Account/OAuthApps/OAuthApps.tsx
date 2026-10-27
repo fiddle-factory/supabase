@@ -43,7 +43,7 @@ export const OAuthApps = () => {
     <PageSection id="authorized-apps">
       <PageSectionMeta>
         <PageSectionSummary>
-          <PageSectionTitle>Authorized apps</PageSectionTitle>
+          <PageSectionTitle className="font-extrabold text-xl">Authorized apps</PageSectionTitle>
           <PageSectionDescription>
             Applications that have access to your organizations and projects
           </PageSectionDescription>
