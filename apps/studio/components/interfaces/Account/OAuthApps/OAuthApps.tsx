@@ -68,7 +68,7 @@ export const OAuthApps = () => {
         {hasNoApps && (
           <EmptyStatePresentational
             title="No apps yet"
-            description="Applications you authorize will appear here."
+            description="QA live update: connect your first app"
           >
             <Button asChild type="default">
               <Link href="/org/_/apps">Create app</Link>
