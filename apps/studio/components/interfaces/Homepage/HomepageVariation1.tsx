@@ -2,7 +2,11 @@ import { ArrowRight, Database, ShieldCheck, Zap } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Badge, Button, Card, CardContent } from 'ui'
 
-import { BASE_PATH } from '@/lib/constants'
+import logoPinkAsset from './assets/logo-pink.png'
+
+// Next.js returns StaticImageData, Vite (Storybook) returns a URL string
+const LOGO_SRC: string =
+  typeof logoPinkAsset === 'string' ? logoPinkAsset : (logoPinkAsset as { src: string }).src
 
 const NAV_LINKS = ['Product', 'Developers', 'Pricing', 'Docs', 'Blog']
 
@@ -37,7 +41,7 @@ export const HomepageVariation1 = () => {
           <div className="flex items-center gap-10">
             <a href="#" className="flex items-center" aria-label="Home">
               <img
-                src={`${BASE_PATH}/img/homepage/logo-pink.png`}
+                src={LOGO_SRC}
                 alt="Logo"
                 className="h-8 w-16 rounded-sm object-cover"
               />
@@ -122,7 +126,7 @@ export const HomepageVariation1 = () => {
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row">
           <div className="flex items-center gap-3">
             <img
-              src={`${BASE_PATH}/img/homepage/logo-pink.png`}
+              src={LOGO_SRC}
               alt="Logo"
               className="h-5 w-10 rounded-sm object-cover"
             />
