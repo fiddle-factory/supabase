@@ -1,4 +1,4 @@
-import assetCopyProof from '../../public/img/asset-copy-proof.png'
+import assetCopyProof from '../../public/img/asset-copy-final.png'
 
 // Bundlers return either a URL string (Vite) or a static image object (Next.js).
 const proofSrc: string =
