@@ -37,7 +37,7 @@ export const HomepageVariation1 = () => {
           <div className="flex items-center gap-10">
             <a href="#" className="flex items-center" aria-label="Home">
               <img
-                src={`${BASE_PATH}/img/homepage/logo.png`}
+                src={`${BASE_PATH}/img/homepage/logo-pink.png`}
                 alt="Logo"
                 className="h-8 w-16 rounded-sm object-cover"
               />
@@ -122,7 +122,7 @@ export const HomepageVariation1 = () => {
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row">
           <div className="flex items-center gap-3">
             <img
-              src={`${BASE_PATH}/img/homepage/logo.png`}
+              src={`${BASE_PATH}/img/homepage/logo-pink.png`}
               alt="Logo"
               className="h-5 w-10 rounded-sm object-cover"
             />
