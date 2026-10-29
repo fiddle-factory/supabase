@@ -103,7 +103,7 @@ export const ProfileInformation = () => {
                   control={form.control}
                   name="first_name"
                   render={({ field }) => (
-                    <FormItemLayout label="First name" layout="flex-row-reverse">
+                    <FormItemLayout label="Display name" layout="flex-row-reverse">
                       <FormControl className="col-span-8">
                         <Input {...field} placeholder="First name" className="w-full" />
                       </FormControl>
