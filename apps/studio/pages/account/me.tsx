@@ -17,6 +17,7 @@ import {
   PageSectionSummary,
   PageSectionTitle,
 } from 'ui-patterns/PageSection'
+import { Admonition } from 'ui-patterns/Admonition'
 import { ShimmeringLoader } from 'ui-patterns/ShimmeringLoader'
 
 import { AccountConnections } from '@/components/interfaces/Account/Preferences/AccountConnections'
@@ -37,8 +38,17 @@ import { IS_PLATFORM } from '@/lib/constants'
 import { useProfile } from '@/lib/profile'
 import type { NextPageWithLayout } from '@/types'
 
-const User: NextPageWithLayout = () => {
-  return IS_PLATFORM ? <PlatformPreferences /> : <SelfHostedPreferences />
+type PreferencesPageProps = {
+  /** Optional success banner shown above the profile form (e.g. after saving). */
+  successMessage?: string
+}
+
+const User: NextPageWithLayout<PreferencesPageProps> = ({ successMessage }) => {
+  return IS_PLATFORM ? (
+    <PlatformPreferences successMessage={successMessage} />
+  ) : (
+    <SelfHostedPreferences />
+  )
 }
 
 User.getLayout = (page) => (
@@ -62,7 +72,7 @@ const PreferencesPageHeader = ({ description }: { description: string }) => (
   </PageHeader>
 )
 
-const PlatformPreferences = () => {
+const PlatformPreferences = ({ successMessage }: PreferencesPageProps) => {
   const router = useRouter()
 
   const { profileShowInformation, profileShowAnalyticsAndMarketing, profileShowAccountDeletion } =
@@ -94,6 +104,8 @@ const PlatformPreferences = () => {
 
         {!isError && (
           <>
+            {successMessage && <Admonition type="success" title={successMessage} />}
+
             {isLoading ? (
               <ProfileLoadingSections showProfileInformation={profileShowInformation} />
             ) : (
