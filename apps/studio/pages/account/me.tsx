@@ -41,11 +41,13 @@ import type { NextPageWithLayout } from '@/types'
 type PreferencesPageProps = {
   /** Optional success banner shown above the profile form (e.g. after saving). */
   successMessage?: string
+  /** Optional error banner shown above the profile form (e.g. after a failed save). */
+  errorMessage?: string
 }
 
-const User: NextPageWithLayout<PreferencesPageProps> = ({ successMessage }) => {
+const User: NextPageWithLayout<PreferencesPageProps> = ({ successMessage, errorMessage }) => {
   return IS_PLATFORM ? (
-    <PlatformPreferences successMessage={successMessage} />
+    <PlatformPreferences successMessage={successMessage} errorMessage={errorMessage} />
   ) : (
     <SelfHostedPreferences />
   )
@@ -72,7 +74,7 @@ const PreferencesPageHeader = ({ description }: { description: string }) => (
   </PageHeader>
 )
 
-const PlatformPreferences = ({ successMessage }: PreferencesPageProps) => {
+const PlatformPreferences = ({ successMessage, errorMessage }: PreferencesPageProps) => {
   const router = useRouter()
 
   const { profileShowInformation, profileShowAnalyticsAndMarketing, profileShowAccountDeletion } =
@@ -105,6 +107,7 @@ const PlatformPreferences = ({ successMessage }: PreferencesPageProps) => {
         {!isError && (
           <>
             {successMessage && <Admonition type="success" title={successMessage} />}
+            {errorMessage && <Admonition type="destructive" title={errorMessage} />}
 
             {isLoading ? (
               <ProfileLoadingSections showProfileInformation={profileShowInformation} />
