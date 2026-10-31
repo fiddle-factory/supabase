@@ -49,7 +49,7 @@ const User: NextPageWithLayout<PreferencesPageProps> = ({ successMessage, errorM
   return IS_PLATFORM ? (
     <PlatformPreferences successMessage={successMessage} errorMessage={errorMessage} />
   ) : (
-    <SelfHostedPreferences />
+    <SelfHostedPreferences successMessage={successMessage} errorMessage={errorMessage} />
   )
 }
 
@@ -72,6 +72,13 @@ const PreferencesPageHeader = ({ description }: { description: string }) => (
       </PageHeaderSummary>
     </PageHeaderMeta>
   </PageHeader>
+)
+
+const PreferencesBanners = ({ successMessage, errorMessage }: PreferencesPageProps) => (
+  <>
+    {successMessage && <Admonition type="success" title={successMessage} />}
+    {errorMessage && <Admonition type="destructive" title={errorMessage} />}
+  </>
 )
 
 const PlatformPreferences = ({ successMessage, errorMessage }: PreferencesPageProps) => {
@@ -106,8 +113,7 @@ const PlatformPreferences = ({ successMessage, errorMessage }: PreferencesPagePr
 
         {!isError && (
           <>
-            {successMessage && <Admonition type="success" title={successMessage} />}
-            {errorMessage && <Admonition type="destructive" title={errorMessage} />}
+            <PreferencesBanners successMessage={successMessage} errorMessage={errorMessage} />
 
             {isLoading ? (
               <ProfileLoadingSections showProfileInformation={profileShowInformation} />
@@ -213,11 +219,13 @@ const ProfileFieldLoadingRow = ({
   </div>
 )
 
-const SelfHostedPreferences = () => {
+const SelfHostedPreferences = ({ successMessage, errorMessage }: PreferencesPageProps) => {
   return (
     <>
       <PreferencesPageHeader description="Manage how the dashboard looks and behaves on this browser and device." />
       <PageContainer size="small">
+        <PreferencesBanners successMessage={successMessage} errorMessage={errorMessage} />
+
         <ThemeSettings />
 
         <TimezoneSettings />
