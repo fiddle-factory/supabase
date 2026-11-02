@@ -32,7 +32,7 @@ const UserOAuthApps: NextPageWithLayout = () => {
   }
 
   return (
-    <>
+    <div className="min-h-full bg-blue-300">
       <PageHeader size="small">
         <PageHeaderMeta>
           <PageHeaderSummary>
@@ -44,7 +44,7 @@ const UserOAuthApps: NextPageWithLayout = () => {
       <PageContainer size="small">
         <OAuthApps />
       </PageContainer>
-    </>
+    </div>
   )
 }
 
