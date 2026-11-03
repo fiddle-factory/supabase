@@ -99,7 +99,7 @@ const PlatformPreferences = () => {
 
   return (
     <>
-      <PreferencesPageHeader description="Manage your account profile, connections, and dashboard experience." />
+      <PreferencesPageHeader description="Account reload round two verified." />
       <PageContainer size="small">
         {isError && (
           <Card>
