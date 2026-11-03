@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardFooter } from 'ui'
 import { PageContainer } from 'ui-patterns/PageContainer'
 import {
@@ -51,16 +51,33 @@ User.getLayout = (page) => (
 
 export default User
 
-const PreferencesPageHeader = ({ description }: { description: string }) => (
-  <PageHeader size="small">
-    <PageHeaderMeta>
-      <PageHeaderSummary>
-        <PageHeaderTitle>Account QA Reload</PageHeaderTitle>
-        <PageHeaderDescription>{description}</PageHeaderDescription>
-      </PageHeaderSummary>
-    </PageHeaderMeta>
-  </PageHeader>
-)
+const PreferencesPageHeader = ({ description }: { description: string }) => {
+  const [headingText, setHeadingText] = useState('Account QA Reload')
+
+  // geneditor-listener-start
+  useEffect(() => {
+    const el = document.querySelector('[data-config-id="AppLayout-div-0"]')
+    if (!el) return
+    const handler = (e: Event) => {
+      const p = (e as CustomEvent).detail as Record<string, unknown>
+      if (typeof p.headingText === 'string') setHeadingText(p.headingText)
+    }
+    el.addEventListener('animation:update', handler)
+    return () => el.removeEventListener('animation:update', handler)
+  }, [])
+  // geneditor-listener-end
+
+  return (
+    <PageHeader size="small">
+      <PageHeaderMeta>
+        <PageHeaderSummary>
+          <PageHeaderTitle>{headingText}</PageHeaderTitle>
+          <PageHeaderDescription>{description}</PageHeaderDescription>
+        </PageHeaderSummary>
+      </PageHeaderMeta>
+    </PageHeader>
+  )
+}
 
 const PlatformPreferences = () => {
   const router = useRouter()
