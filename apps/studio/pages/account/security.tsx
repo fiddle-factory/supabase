@@ -27,7 +27,7 @@ const Security: NextPageWithLayout = () => {
       <PageHeader size="small">
         <PageHeaderMeta>
           <PageHeaderSummary>
-            <PageHeaderTitle>Security</PageHeaderTitle>
+            <PageHeaderTitle>Security QA Reload</PageHeaderTitle>
             <PageHeaderDescription>
               Manage your account security settings and authentication methods.
             </PageHeaderDescription>
