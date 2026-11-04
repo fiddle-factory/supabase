@@ -1,10 +1,13 @@
-import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
+import React, { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
 import { Button, cn } from 'ui'
 
 import {
   BALL_RADIUS,
+  BALL_SPEED,
   BOARD_HEIGHT,
   BOARD_WIDTH,
+  BRICK_COLUMNS,
+  BRICK_GAP,
   BRICK_ROWS,
   circleIntersectsRect,
   clampPaddleX,
@@ -33,10 +36,114 @@ const BRICK_COLOR_CLASSES = [
   'text-foreground-light',
   'text-foreground-lighter',
 ]
+const FOREGROUND_INDEX = BRICK_COLOR_CLASSES.length
+const BRAND_INDEX = 2
+
+// Hex approximations of the design tokens above. While a color still equals its default,
+// the theme token is used instead so the game keeps following light/dark mode.
+const DEFAULT_BRICK_ROW_COLORS = ['#e54d2e', '#db8e00', '#3ecf8e', '#b4b4b4', '#898989']
+const DEFAULT_PADDLE_COLOR = '#ededed'
+const DEFAULT_BALL_COLOR = '#3ecf8e'
+const DEFAULT_BOARD_BACKGROUND = '#1f1f1f'
+const DEFAULT_BRICK_RADIUS = 3
+
+const isDefaultColor = (value: string, defaultValue: string) =>
+  value.toLowerCase() === defaultValue.toLowerCase()
 
 export const BreakoutGame = ({ className }: { className?: string }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const paletteRef = useRef<HTMLDivElement>(null)
+
+  // Tunable appearance and gameplay settings
+  const [brickRow1Color, setBrickRow1Color] = useState(DEFAULT_BRICK_ROW_COLORS[0])
+  const [brickRow2Color, setBrickRow2Color] = useState(DEFAULT_BRICK_ROW_COLORS[1])
+  const [brickRow3Color, setBrickRow3Color] = useState(DEFAULT_BRICK_ROW_COLORS[2])
+  const [brickRow4Color, setBrickRow4Color] = useState(DEFAULT_BRICK_ROW_COLORS[3])
+  const [brickRow5Color, setBrickRow5Color] = useState(DEFAULT_BRICK_ROW_COLORS[4])
+  const [brickGap, setBrickGap] = useState(BRICK_GAP)
+  const [brickRadius, setBrickRadius] = useState(DEFAULT_BRICK_RADIUS)
+
+  const [paddleColor, setPaddleColor] = useState(DEFAULT_PADDLE_COLOR)
+  const [paddleWidth, setPaddleWidth] = useState(PADDLE_WIDTH)
+  const [ballColor, setBallColor] = useState(DEFAULT_BALL_COLOR)
+  const [ballRadius, setBallRadius] = useState(BALL_RADIUS)
+  const [ballSpeed, setBallSpeed] = useState(BALL_SPEED)
+
+  const [brickRows, setBrickRows] = useState(BRICK_ROWS)
+  const [brickColumns, setBrickColumns] = useState(BRICK_COLUMNS)
+  const [boardBackground, setBoardBackground] = useState(DEFAULT_BOARD_BACKGROUND)
+  const [showScore, setShowScore] = useState(true)
+  const [showLives, setShowLives] = useState(true)
+
+  const settings = {
+    brickRowColors: [brickRow1Color, brickRow2Color, brickRow3Color, brickRow4Color, brickRow5Color],
+    brickGap,
+    brickRadius,
+    brickRows,
+    brickColumns,
+    paddleColor,
+    paddleWidth,
+    ballColor,
+    ballRadius,
+    ballSpeed,
+  }
+  const settingsRef = useRef(settings)
+  useEffect(() => {
+    settingsRef.current = settings
+  })
+
+  // geneditor-listener-start
+  React.useEffect(() => {
+    const el = document.querySelector('[data-config-id="BreakoutGame-bricks"]')
+    if (!el) return
+    const handler = (e: Event) => {
+      const p = (e as CustomEvent).detail as Record<string, unknown>
+      if (typeof p.brickRow1Color === 'string') setBrickRow1Color(p.brickRow1Color)
+      if (typeof p.brickRow2Color === 'string') setBrickRow2Color(p.brickRow2Color)
+      if (typeof p.brickRow3Color === 'string') setBrickRow3Color(p.brickRow3Color)
+      if (typeof p.brickRow4Color === 'string') setBrickRow4Color(p.brickRow4Color)
+      if (typeof p.brickRow5Color === 'string') setBrickRow5Color(p.brickRow5Color)
+      if (typeof p.brickGap === 'number') setBrickGap(p.brickGap)
+      if (typeof p.brickRadius === 'number') setBrickRadius(p.brickRadius)
+    }
+    el.addEventListener('animation:update', handler)
+    return () => el.removeEventListener('animation:update', handler)
+  }, [])
+  // geneditor-listener-end
+
+  // geneditor-listener-start
+  React.useEffect(() => {
+    const el = document.querySelector('[data-config-id="BreakoutGame-paddle-ball"]')
+    if (!el) return
+    const handler = (e: Event) => {
+      const p = (e as CustomEvent).detail as Record<string, unknown>
+      if (typeof p.paddleColor === 'string') setPaddleColor(p.paddleColor)
+      if (typeof p.paddleWidth === 'number') setPaddleWidth(p.paddleWidth)
+      if (typeof p.ballColor === 'string') setBallColor(p.ballColor)
+      if (typeof p.ballRadius === 'number') setBallRadius(p.ballRadius)
+      if (typeof p.ballSpeed === 'number') setBallSpeed(p.ballSpeed)
+    }
+    el.addEventListener('animation:update', handler)
+    return () => el.removeEventListener('animation:update', handler)
+  }, [])
+  // geneditor-listener-end
+
+  // geneditor-listener-start
+  React.useEffect(() => {
+    const el = document.querySelector('[data-config-id="BreakoutGame-board"]')
+    if (!el) return
+    const handler = (e: Event) => {
+      const p = (e as CustomEvent).detail as Record<string, unknown>
+      if (typeof p.brickRows === 'number') setBrickRows(p.brickRows)
+      if (typeof p.brickColumns === 'number') setBrickColumns(p.brickColumns)
+      if (typeof p.boardBackground === 'string') setBoardBackground(p.boardBackground)
+      if (typeof p.showScore === 'boolean') setShowScore(p.showScore)
+      if (typeof p.showLives === 'boolean') setShowLives(p.showLives)
+    }
+    el.addEventListener('animation:update', handler)
+    return () => el.removeEventListener('animation:update', handler)
+  }, [])
+  // geneditor-listener-end
 
   const paddleXRef = useRef((BOARD_WIDTH - PADDLE_WIDTH) / 2)
   const ballRef = useRef<Ball>(createBall(paddleXRef.current))
@@ -57,10 +164,40 @@ export const BreakoutGame = ({ className }: { className?: string }) => {
     setStatus(next)
   }
 
+  const getBallOptions = () => {
+    const s = settingsRef.current
+    return { paddleWidth: s.paddleWidth, radius: s.ballRadius, speed: s.ballSpeed }
+  }
+
+  const getBrickOptions = () => {
+    const s = settingsRef.current
+    return { rows: s.brickRows, columns: s.brickColumns, gap: s.brickGap }
+  }
+
+  // Rebuild the wall when its layout changes
+  useEffect(() => {
+    bricksRef.current = createBricks({ rows: brickRows, columns: brickColumns, gap: brickGap })
+  }, [brickRows, brickColumns, brickGap])
+
+  // Keep the paddle on the board when its width changes
+  useEffect(() => {
+    paddleXRef.current = clampPaddleX(paddleXRef.current, paddleWidth)
+  }, [paddleWidth])
+
+  // Rescale the ball velocity when its speed changes
+  useEffect(() => {
+    const ball = ballRef.current
+    const current = Math.hypot(ball.dx, ball.dy)
+    if (current === 0) return
+    ball.dx = (ball.dx / current) * ballSpeed
+    ball.dy = (ball.dy / current) * ballSpeed
+  }, [ballSpeed])
+
   const handleRestart = () => {
-    paddleXRef.current = (BOARD_WIDTH - PADDLE_WIDTH) / 2
-    ballRef.current = createBall(paddleXRef.current)
-    bricksRef.current = createBricks()
+    const { paddleWidth } = settingsRef.current
+    paddleXRef.current = (BOARD_WIDTH - paddleWidth) / 2
+    ballRef.current = createBall(paddleXRef.current, getBallOptions())
+    bricksRef.current = createBricks(getBrickOptions())
     scoreRef.current = 0
     livesRef.current = STARTING_LIVES
     setScore(0)
@@ -93,7 +230,8 @@ export const BreakoutGame = ({ className }: { className?: string }) => {
     if (!canvas) return
     const rect = canvas.getBoundingClientRect()
     const x = ((event.clientX - rect.left) / rect.width) * BOARD_WIDTH
-    paddleXRef.current = clampPaddleX(x - PADDLE_WIDTH / 2)
+    const { paddleWidth } = settingsRef.current
+    paddleXRef.current = clampPaddleX(x - paddleWidth / 2, paddleWidth)
   }
 
   const handlePointerDown = () => {
@@ -117,19 +255,26 @@ export const BreakoutGame = ({ className }: { className?: string }) => {
       return el ? getComputedStyle(el).color : 'currentColor'
     }
 
+    const resolveColor = (value: string, defaultValue: string, tokenIndex: number) =>
+      isDefaultColor(value, defaultValue) ? readColor(tokenIndex) : value
+
     let frameId = 0
     let lastTime = performance.now()
 
     const step = (dt: number) => {
+      const s = settingsRef.current
+      const radius = s.ballRadius
       const keys = keysRef.current
-      if (keys.left) paddleXRef.current = clampPaddleX(paddleXRef.current - PADDLE_SPEED * dt)
-      if (keys.right) paddleXRef.current = clampPaddleX(paddleXRef.current + PADDLE_SPEED * dt)
+      if (keys.left)
+        paddleXRef.current = clampPaddleX(paddleXRef.current - PADDLE_SPEED * dt, s.paddleWidth)
+      if (keys.right)
+        paddleXRef.current = clampPaddleX(paddleXRef.current + PADDLE_SPEED * dt, s.paddleWidth)
 
       const ball = ballRef.current
 
       if (statusRef.current === 'ready') {
-        ball.x = paddleXRef.current + PADDLE_WIDTH / 2
-        ball.y = PADDLE_Y - BALL_RADIUS - 1
+        ball.x = paddleXRef.current + s.paddleWidth / 2
+        ball.y = PADDLE_Y - radius - 1
         return
       }
       if (statusRef.current !== 'playing') return
@@ -138,15 +283,15 @@ export const BreakoutGame = ({ className }: { className?: string }) => {
       ball.y += ball.dy * dt
 
       // Walls
-      if (ball.x - BALL_RADIUS < 0) {
-        ball.x = BALL_RADIUS
+      if (ball.x - radius < 0) {
+        ball.x = radius
         ball.dx = Math.abs(ball.dx)
-      } else if (ball.x + BALL_RADIUS > BOARD_WIDTH) {
-        ball.x = BOARD_WIDTH - BALL_RADIUS
+      } else if (ball.x + radius > BOARD_WIDTH) {
+        ball.x = BOARD_WIDTH - radius
         ball.dx = -Math.abs(ball.dx)
       }
-      if (ball.y - BALL_RADIUS < 0) {
-        ball.y = BALL_RADIUS
+      if (ball.y - radius < 0) {
+        ball.y = radius
         ball.dy = Math.abs(ball.dy)
       }
 
@@ -154,68 +299,86 @@ export const BreakoutGame = ({ className }: { className?: string }) => {
       const paddle = {
         x: paddleXRef.current,
         y: PADDLE_Y,
-        width: PADDLE_WIDTH,
+        width: s.paddleWidth,
         height: PADDLE_HEIGHT,
       }
-      if (ball.dy > 0 && circleIntersectsRect(ball, paddle)) {
-        const bounce = getPaddleBounce(ball.x, paddleXRef.current)
+      if (ball.dy > 0 && circleIntersectsRect(ball, paddle, radius)) {
+        const bounce = getPaddleBounce(ball.x, paddleXRef.current, {
+          paddleWidth: s.paddleWidth,
+          speed: s.ballSpeed,
+        })
         ball.dx = bounce.dx
         ball.dy = bounce.dy
-        ball.y = PADDLE_Y - BALL_RADIUS - 1
+        ball.y = PADDLE_Y - radius - 1
       }
 
       // Bricks (at most one hit per frame)
       const hitBrick = bricksRef.current.find(
-        (brick) => !brick.isBroken && circleIntersectsRect(ball, brick)
+        (brick) => !brick.isBroken && circleIntersectsRect(ball, brick, radius)
       )
       if (hitBrick) {
         hitBrick.isBroken = true
         const overlapX = Math.min(
-          ball.x + BALL_RADIUS - hitBrick.x,
-          hitBrick.x + hitBrick.width - (ball.x - BALL_RADIUS)
+          ball.x + radius - hitBrick.x,
+          hitBrick.x + hitBrick.width - (ball.x - radius)
         )
         const overlapY = Math.min(
-          ball.y + BALL_RADIUS - hitBrick.y,
-          hitBrick.y + hitBrick.height - (ball.y - BALL_RADIUS)
+          ball.y + radius - hitBrick.y,
+          hitBrick.y + hitBrick.height - (ball.y - radius)
         )
         if (overlapX < overlapY) ball.dx = -ball.dx
         else ball.dy = -ball.dy
 
-        scoreRef.current += POINTS_PER_BRICK * (BRICK_ROWS - hitBrick.row)
+        scoreRef.current += POINTS_PER_BRICK * Math.max(1, s.brickRows - hitBrick.row)
         setScore(scoreRef.current)
         if (bricksRef.current.every((brick) => brick.isBroken)) updateStatus('won')
       }
 
       // Missed the ball
-      if (ball.y - BALL_RADIUS > BOARD_HEIGHT) {
+      if (ball.y - radius > BOARD_HEIGHT) {
         livesRef.current -= 1
         setLives(livesRef.current)
-        ballRef.current = createBall(paddleXRef.current)
+        ballRef.current = createBall(paddleXRef.current, {
+          paddleWidth: s.paddleWidth,
+          radius: s.ballRadius,
+          speed: s.ballSpeed,
+        })
         updateStatus(livesRef.current <= 0 ? 'lost' : 'ready')
       }
     }
 
     const draw = () => {
+      const s = settingsRef.current
       ctx.clearRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT)
 
       bricksRef.current.forEach((brick) => {
         if (brick.isBroken) return
-        ctx.fillStyle = readColor(brick.row % BRICK_COLOR_CLASSES.length)
+        const colorIndex = brick.row % BRICK_COLOR_CLASSES.length
+        ctx.fillStyle = resolveColor(
+          s.brickRowColors[colorIndex],
+          DEFAULT_BRICK_ROW_COLORS[colorIndex],
+          colorIndex
+        )
         ctx.beginPath()
-        ctx.roundRect(brick.x, brick.y, brick.width, brick.height, 3)
+        ctx.roundRect(
+          brick.x,
+          brick.y,
+          brick.width,
+          brick.height,
+          Math.min(s.brickRadius, brick.height / 2, brick.width / 2)
+        )
         ctx.fill()
       })
 
-      const foreground = readColor(BRICK_COLOR_CLASSES.length)
-      ctx.fillStyle = foreground
+      ctx.fillStyle = resolveColor(s.paddleColor, DEFAULT_PADDLE_COLOR, FOREGROUND_INDEX)
       ctx.beginPath()
-      ctx.roundRect(paddleXRef.current, PADDLE_Y, PADDLE_WIDTH, PADDLE_HEIGHT, 4)
+      ctx.roundRect(paddleXRef.current, PADDLE_Y, s.paddleWidth, PADDLE_HEIGHT, 4)
       ctx.fill()
 
       if (statusRef.current !== 'lost') {
-        ctx.fillStyle = readColor(2)
+        ctx.fillStyle = resolveColor(s.ballColor, DEFAULT_BALL_COLOR, BRAND_INDEX)
         ctx.beginPath()
-        ctx.arc(ballRef.current.x, ballRef.current.y, BALL_RADIUS, 0, Math.PI * 2)
+        ctx.arc(ballRef.current.x, ballRef.current.y, s.ballRadius, 0, Math.PI * 2)
         ctx.fill()
       }
     }
@@ -234,7 +397,10 @@ export const BreakoutGame = ({ className }: { className?: string }) => {
   }, [])
 
   return (
-    <div className={cn('flex w-full max-w-[480px] flex-col gap-2', className)}>
+    <div
+      data-config-id="BreakoutGame-board"
+      className={cn('flex w-full max-w-[480px] flex-col gap-2', className)}
+    >
       <div aria-hidden className="hidden" ref={paletteRef}>
         {BRICK_COLOR_CLASSES.map((colorClass) => (
           <span key={colorClass} className={colorClass} />
@@ -242,18 +408,33 @@ export const BreakoutGame = ({ className }: { className?: string }) => {
         <span className="text-foreground" />
       </div>
 
-      <div className="flex items-center justify-between text-sm">
-        <p className="text-foreground-light">
-          Score <span className="font-mono text-foreground">{score}</span>
-        </p>
-        <p className="text-foreground-light">
-          Lives <span className="font-mono text-foreground">{lives}</span>
-        </p>
-      </div>
+      {(showScore || showLives) && (
+        <div className="flex items-center justify-between text-sm">
+          {showScore && (
+            <p className="text-foreground-light">
+              Score <span className="font-mono text-foreground">{score}</span>
+            </p>
+          )}
+          {showLives && (
+            <p className="ml-auto text-foreground-light">
+              Lives <span className="font-mono text-foreground">{lives}</span>
+            </p>
+          )}
+        </div>
+      )}
 
-      <div className="relative overflow-hidden rounded-md border bg-surface-100">
+      <div
+        data-config-id="BreakoutGame-bricks"
+        className="relative overflow-hidden rounded-md border bg-surface-100"
+        style={{
+          backgroundColor: isDefaultColor(boardBackground, DEFAULT_BOARD_BACKGROUND)
+            ? undefined
+            : boardBackground,
+        }}
+      >
         <canvas
           ref={canvasRef}
+          data-config-id="BreakoutGame-paddle-ball"
           tabIndex={0}
           aria-label="Breakout game. Use the left and right arrow keys or your mouse to move the paddle. Press space to launch the ball."
           className="block w-full cursor-none touch-none outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand"

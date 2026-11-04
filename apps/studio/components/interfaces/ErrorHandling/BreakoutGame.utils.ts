@@ -35,15 +35,18 @@ export interface Ball {
   dy: number
 }
 
-export function createBricks(): Brick[] {
-  const width =
-    (BOARD_WIDTH - BRICK_OFFSET_SIDE * 2 - BRICK_GAP * (BRICK_COLUMNS - 1)) / BRICK_COLUMNS
+export function createBricks({
+  rows = BRICK_ROWS,
+  columns = BRICK_COLUMNS,
+  gap = BRICK_GAP,
+}: { rows?: number; columns?: number; gap?: number } = {}): Brick[] {
+  const width = (BOARD_WIDTH - BRICK_OFFSET_SIDE * 2 - gap * (columns - 1)) / columns
   const bricks: Brick[] = []
-  for (let row = 0; row < BRICK_ROWS; row++) {
-    for (let col = 0; col < BRICK_COLUMNS; col++) {
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < columns; col++) {
       bricks.push({
-        x: BRICK_OFFSET_SIDE + col * (width + BRICK_GAP),
-        y: BRICK_OFFSET_TOP + row * (BRICK_HEIGHT + BRICK_GAP),
+        x: BRICK_OFFSET_SIDE + col * (width + gap),
+        y: BRICK_OFFSET_TOP + row * (BRICK_HEIGHT + gap),
         width,
         height: BRICK_HEIGHT,
         row,
@@ -54,39 +57,51 @@ export function createBricks(): Brick[] {
   return bricks
 }
 
-export function createBall(paddleX: number): Ball {
+export function createBall(
+  paddleX: number,
+  {
+    paddleWidth = PADDLE_WIDTH,
+    radius = BALL_RADIUS,
+    speed = BALL_SPEED,
+  }: { paddleWidth?: number; radius?: number; speed?: number } = {}
+): Ball {
   // Launch upward at a slight random angle
   const angle = (Math.random() * 0.6 - 0.3) * Math.PI
   return {
-    x: paddleX + PADDLE_WIDTH / 2,
-    y: BOARD_HEIGHT - PADDLE_OFFSET_BOTTOM - PADDLE_HEIGHT - BALL_RADIUS - 1,
-    dx: Math.sin(angle) * BALL_SPEED,
-    dy: -Math.cos(angle) * BALL_SPEED,
+    x: paddleX + paddleWidth / 2,
+    y: BOARD_HEIGHT - PADDLE_OFFSET_BOTTOM - PADDLE_HEIGHT - radius - 1,
+    dx: Math.sin(angle) * speed,
+    dy: -Math.cos(angle) * speed,
   }
 }
 
-export function clampPaddleX(x: number) {
-  return Math.max(0, Math.min(BOARD_WIDTH - PADDLE_WIDTH, x))
+export function clampPaddleX(x: number, paddleWidth = PADDLE_WIDTH) {
+  return Math.max(0, Math.min(BOARD_WIDTH - paddleWidth, x))
 }
 
 export function circleIntersectsRect(
   ball: Pick<Ball, 'x' | 'y'>,
-  rect: { x: number; y: number; width: number; height: number }
+  rect: { x: number; y: number; width: number; height: number },
+  radius = BALL_RADIUS
 ) {
   const closestX = Math.max(rect.x, Math.min(ball.x, rect.x + rect.width))
   const closestY = Math.max(rect.y, Math.min(ball.y, rect.y + rect.height))
   const distX = ball.x - closestX
   const distY = ball.y - closestY
-  return distX * distX + distY * distY <= BALL_RADIUS * BALL_RADIUS
+  return distX * distX + distY * distY <= radius * radius
 }
 
 /**
  * Returns the new horizontal/vertical velocity after the ball hits the paddle.
  * The further from the paddle center, the steeper the bounce angle.
  */
-export function getPaddleBounce(ballX: number, paddleX: number) {
-  const hitPosition = (ballX - (paddleX + PADDLE_WIDTH / 2)) / (PADDLE_WIDTH / 2)
+export function getPaddleBounce(
+  ballX: number,
+  paddleX: number,
+  { paddleWidth = PADDLE_WIDTH, speed = BALL_SPEED }: { paddleWidth?: number; speed?: number } = {}
+) {
+  const hitPosition = (ballX - (paddleX + paddleWidth / 2)) / (paddleWidth / 2)
   const clamped = Math.max(-1, Math.min(1, hitPosition))
   const angle = clamped * (Math.PI / 3)
-  return { dx: Math.sin(angle) * BALL_SPEED, dy: -Math.cos(angle) * BALL_SPEED }
+  return { dx: Math.sin(angle) * speed, dy: -Math.cos(angle) * speed }
 }
