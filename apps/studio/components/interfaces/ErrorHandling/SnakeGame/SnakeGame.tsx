@@ -4,67 +4,63 @@ import { Button, cn } from 'ui'
 import {
   createSnakeState,
   getDirectionFromKey,
+  getTickMs,
   SNAKE_GRID_SIZE,
   SNAKE_TICK_MS,
   snakeReducer,
 } from './SnakeGame.utils'
 
-const CELLS = Array.from({ length: SNAKE_GRID_SIZE * SNAKE_GRID_SIZE }, (_, index) => ({
-  x: index % SNAKE_GRID_SIZE,
-  y: Math.floor(index / SNAKE_GRID_SIZE),
-}))
-
-const DEFAULT_SNAKE_COLOR = '#3ecf8e'
-const DEFAULT_FOOD_COLOR = '#e54d2e'
-const DEFAULT_BOARD_COLOR = '#1c1c1c'
-
 export const SnakeGame = () => {
   const boardRef = useRef<HTMLDivElement>(null)
-  const [snakeColor, setSnakeColor] = useState(DEFAULT_SNAKE_COLOR)
-  const [foodColor, setFoodColor] = useState(DEFAULT_FOOD_COLOR)
-  const [boardColor, setBoardColor] = useState(DEFAULT_BOARD_COLOR)
-  const [cellSize, setCellSize] = useState(16)
   const [tickMs, setTickMs] = useState(SNAKE_TICK_MS)
-  const [cornerRadius, setCornerRadius] = useState(2)
+  const [speedUpMs, setSpeedUpMs] = useState(0)
+  const [cellSize, setCellSize] = useState(16)
+  const [boardWidth, setBoardWidth] = useState(SNAKE_GRID_SIZE)
+  const [boardHeight, setBoardHeight] = useState(SNAKE_GRID_SIZE)
   const [showGrid, setShowGrid] = useState(true)
+  const [showScore, setShowScore] = useState(true)
+
+  const [state, dispatch] = useReducer(snakeReducer, undefined, () =>
+    createSnakeState(0, 0.5, boardWidth, boardHeight)
+  )
+  const { status, snake, food, score, highScore, width, height } = state
 
   // geneditor-listener-start
   React.useEffect(() => {
-    const el = document.querySelector('[data-config-id="InternalServerError.stories-div-0"]')
+    const el = document.querySelector('[data-config-id="SnakeGame-controls"]')
     if (!el) return
     const handler = (e: Event) => {
       const p = (e as CustomEvent).detail as Record<string, unknown>
-      if (typeof p.snakeColor === 'string') setSnakeColor(p.snakeColor)
-      if (typeof p.foodColor === 'string') setFoodColor(p.foodColor)
-      if (typeof p.boardColor === 'string') setBoardColor(p.boardColor)
-      if (typeof p.cellSize === 'number') setCellSize(p.cellSize)
       if (typeof p.tickMs === 'number') setTickMs(p.tickMs)
-      if (typeof p.cornerRadius === 'number') setCornerRadius(p.cornerRadius)
+      if (typeof p.speedUpMs === 'number') setSpeedUpMs(p.speedUpMs)
+      if (typeof p.cellSize === 'number') setCellSize(p.cellSize)
+      if (typeof p.boardWidth === 'number') setBoardWidth(p.boardWidth)
+      if (typeof p.boardHeight === 'number') setBoardHeight(p.boardHeight)
       if (typeof p.showGrid === 'boolean') setShowGrid(p.showGrid)
+      if (typeof p.showScore === 'boolean') setShowScore(p.showScore)
     }
     el.addEventListener('animation:update', handler)
     return () => el.removeEventListener('animation:update', handler)
   }, [])
   // geneditor-listener-end
 
-  // Colors fall back to the theme tokens until they're changed from their defaults
-  const isSnakeColorCustom = snakeColor.toLowerCase() !== DEFAULT_SNAKE_COLOR
-  const isFoodColorCustom = foodColor.toLowerCase() !== DEFAULT_FOOD_COLOR
-  const isBoardColorCustom = boardColor.toLowerCase() !== DEFAULT_BOARD_COLOR
-  const [state, dispatch] = useReducer(snakeReducer, undefined, () => createSnakeState())
-  const { status, snake, food, score, highScore } = state
+  // Resizing the board starts a fresh game; the reducer ignores unchanged sizes
+  useEffect(() => {
+    dispatch({ type: 'resize', width: boardWidth, height: boardHeight, random: Math.random() })
+  }, [boardWidth, boardHeight])
 
   const isPlaying = status === 'playing'
   const isGameOver = status === 'over'
+  const currentTickMs = getTickMs(tickMs, speedUpMs, score)
 
   useEffect(() => {
     if (!isPlaying) return
     const interval = window.setInterval(
       () => dispatch({ type: 'tick', random: Math.random() }),
-      tickMs
+      currentTickMs
     )
     return () => window.clearInterval(interval)
-  }, [isPlaying, tickMs])
+  }, [isPlaying, currentTickMs])
 
   const handleRestart = () => {
     dispatch({ type: 'start', random: Math.random() })
@@ -83,19 +79,25 @@ export const SnakeGame = () => {
     dispatch({ type: 'turn', direction })
   }
 
+  const cells = Array.from({ length: width * height }, (_, index) => ({
+    x: index % width,
+    y: Math.floor(index / width),
+  }))
   const snakeKeys = new Set(snake.map((segment) => `${segment.x}:${segment.y}`))
   const head = snake[0]
 
   return (
-    <div className="flex flex-col items-center gap-y-3">
-      <div className="flex w-full items-center justify-between text-sm">
-        <p className="text-foreground-light">
-          Score <span className="font-mono text-foreground">{score}</span>
-        </p>
-        <p className="text-foreground-light">
-          Best <span className="font-mono text-foreground">{highScore}</span>
-        </p>
-      </div>
+    <div data-config-id="SnakeGame-controls" className="flex flex-col items-center gap-y-3">
+      {showScore && (
+        <div className="flex w-full items-center justify-between text-sm">
+          <p className="text-foreground-light">
+            Score <span className="font-mono text-foreground">{score}</span>
+          </p>
+          <p className="text-foreground-light">
+            Best <span className="font-mono text-foreground">{highScore}</span>
+          </p>
+        </div>
+      )}
 
       <div
         ref={boardRef}
@@ -104,46 +106,29 @@ export const SnakeGame = () => {
         tabIndex={0}
         onKeyDown={handleKeyDown}
         className={cn(
-          'relative grid gap-px rounded-md border border-default bg-surface-200 p-1',
+          'relative grid rounded-md border border-default bg-surface-200 p-1',
+          showGrid && 'gap-px',
           'outline-none focus-visible:ring-2 focus-visible:ring-brand-500'
         )}
-        style={{
-          gridTemplateColumns: `repeat(${SNAKE_GRID_SIZE}, ${cellSize}px)`,
-          gap: showGrid ? 1 : 0,
-        }}
+        style={{ gridTemplateColumns: `repeat(${width}, ${cellSize}px)` }}
       >
-        {CELLS.map((cell) => {
+        {cells.map((cell) => {
           const key = `${cell.x}:${cell.y}`
           const isHead = cell.x === head.x && cell.y === head.y
           const isSnake = snakeKeys.has(key)
           const isFood = cell.x === food.x && cell.y === food.y
-          const isFoodCell = isFood && !isSnake
-          const isEmpty = !isSnake && !isFood
-
-          let backgroundColor: string | undefined
-          if (isEmpty && isBoardColorCustom) backgroundColor = boardColor
-          if (isSnake && isSnakeColorCustom) {
-            backgroundColor = isHead
-              ? snakeColor
-              : `color-mix(in srgb, ${snakeColor} 55%, black)`
-          }
-          if (isFoodCell && isFoodColorCustom) backgroundColor = foodColor
 
           return (
             <div
               key={key}
               className={cn(
-                isEmpty && 'bg-surface-100',
+                'rounded-sm',
+                !isSnake && !isFood && 'bg-surface-100',
                 isSnake && 'bg-brand-500',
                 isHead && 'bg-brand',
-                isFoodCell && 'bg-destructive'
+                isFood && !isSnake && 'rounded-full bg-destructive'
               )}
-              style={{
-                width: cellSize,
-                height: cellSize,
-                borderRadius: isFoodCell ? '9999px' : cornerRadius,
-                backgroundColor,
-              }}
+              style={{ width: cellSize, height: cellSize }}
             />
           )
         })}

@@ -3,8 +3,10 @@ import { describe, expect, it } from 'vitest'
 import {
   createSnakeState,
   getDirectionFromKey,
+  getTickMs,
   placeFood,
   SNAKE_GRID_SIZE,
+  SNAKE_MIN_TICK_MS,
   snakeReducer,
 } from './SnakeGame.utils'
 
@@ -48,5 +50,26 @@ describe('SnakeGame.utils', () => {
     expect(next.status).toBe('over')
     expect(next.highScore).toBe(3)
     expect(snakeReducer(next, { type: 'start', random: 0 }).highScore).toBe(3)
+  })
+
+  it('respects a custom board size for walls and food', () => {
+    const state = snakeReducer(createSnakeState(), {
+      type: 'resize',
+      width: 10,
+      height: 8,
+      random: 0.99,
+    })
+    expect(state).toMatchObject({ width: 10, height: 8, status: 'idle' })
+    expect(state.food.x).toBeLessThan(10)
+    expect(state.food.y).toBeLessThan(8)
+
+    const atRightWall = { ...state, status: 'playing' as const, snake: [{ x: 9, y: 0 }] }
+    expect(snakeReducer(atRightWall, { type: 'tick', random: 0 }).status).toBe('over')
+  })
+
+  it('speeds up per food eaten without dropping below the minimum interval', () => {
+    expect(getTickMs(120, 0, 10)).toBe(120)
+    expect(getTickMs(120, 5, 4)).toBe(100)
+    expect(getTickMs(120, 5, 100)).toBe(SNAKE_MIN_TICK_MS)
   })
 })

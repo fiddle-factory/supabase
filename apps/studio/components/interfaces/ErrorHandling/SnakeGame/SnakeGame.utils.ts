@@ -1,5 +1,7 @@
 export const SNAKE_GRID_SIZE = 16
 export const SNAKE_TICK_MS = 120
+export const SNAKE_MIN_TICK_MS = 30
+export const SNAKE_MIN_GRID_SIZE = 6
 
 export type SnakeDirection = 'up' | 'down' | 'left' | 'right'
 
@@ -15,12 +17,15 @@ export type SnakeState = {
   pendingDirection: SnakeDirection
   score: number
   highScore: number
+  width: number
+  height: number
 }
 
 export type SnakeAction =
   | { type: 'start'; random: number }
   | { type: 'turn'; direction: SnakeDirection }
   | { type: 'tick'; random: number }
+  | { type: 'resize'; width: number; height: number; random: number }
 
 const DIRECTION_VECTORS: Record<SnakeDirection, SnakePoint> = {
   up: { x: 0, y: -1 },
@@ -53,10 +58,15 @@ export const getDirectionFromKey = (key: string): SnakeDirection | undefined =>
 const isSamePoint = (a: SnakePoint, b: SnakePoint) => a.x === b.x && a.y === b.y
 
 /** Picks a free cell for the food using a random number in [0, 1). */
-export const placeFood = (snake: SnakePoint[], random: number, size = SNAKE_GRID_SIZE) => {
+export const placeFood = (
+  snake: SnakePoint[],
+  random: number,
+  width = SNAKE_GRID_SIZE,
+  height = width
+) => {
   const freeCells: SnakePoint[] = []
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
       if (!snake.some((segment) => segment.x === x && segment.y === y)) freeCells.push({ x, y })
     }
   }
@@ -64,32 +74,60 @@ export const placeFood = (snake: SnakePoint[], random: number, size = SNAKE_GRID
   return freeCells[Math.min(freeCells.length - 1, Math.floor(random * freeCells.length))]
 }
 
-const createInitialSnake = (size = SNAKE_GRID_SIZE): SnakePoint[] => {
-  const mid = Math.floor(size / 2)
+const createInitialSnake = (width: number, height: number): SnakePoint[] => {
+  const midX = Math.floor(width / 2)
+  const midY = Math.floor(height / 2)
   return [
-    { x: mid, y: mid },
-    { x: mid - 1, y: mid },
-    { x: mid - 2, y: mid },
+    { x: midX, y: midY },
+    { x: midX - 1, y: midY },
+    { x: midX - 2, y: midY },
   ]
 }
 
-export const createSnakeState = (highScore = 0, random = 0.5): SnakeState => {
-  const snake = createInitialSnake()
+/** Clamps a board dimension to a whole number of cells that fits the starting snake. */
+export const clampGridSize = (size: number) =>
+  Math.max(SNAKE_MIN_GRID_SIZE, Math.round(Number.isFinite(size) ? size : SNAKE_GRID_SIZE))
+
+/** Tick interval after speeding up by `speedUpMs` for every food eaten. */
+export const getTickMs = (baseTickMs: number, speedUpMs: number, score: number) =>
+  Math.max(SNAKE_MIN_TICK_MS, baseTickMs - Math.max(0, speedUpMs) * score)
+
+export const createSnakeState = (
+  highScore = 0,
+  random = 0.5,
+  width = SNAKE_GRID_SIZE,
+  height = SNAKE_GRID_SIZE
+): SnakeState => {
+  const boardWidth = clampGridSize(width)
+  const boardHeight = clampGridSize(height)
+  const snake = createInitialSnake(boardWidth, boardHeight)
   return {
     status: 'idle',
     snake,
-    food: placeFood(snake, random),
+    food: placeFood(snake, random, boardWidth, boardHeight),
     direction: 'right',
     pendingDirection: 'right',
     score: 0,
     highScore,
+    width: boardWidth,
+    height: boardHeight,
   }
 }
 
 export const snakeReducer = (state: SnakeState, action: SnakeAction): SnakeState => {
   switch (action.type) {
     case 'start':
-      return { ...createSnakeState(state.highScore, action.random), status: 'playing' }
+      return {
+        ...createSnakeState(state.highScore, action.random, state.width, state.height),
+        status: 'playing',
+      }
+
+    case 'resize': {
+      const width = clampGridSize(action.width)
+      const height = clampGridSize(action.height)
+      if (width === state.width && height === state.height) return state
+      return createSnakeState(state.highScore, action.random, width, height)
+    }
 
     case 'turn': {
       if (state.status === 'over') return state
@@ -115,8 +153,8 @@ export const snakeReducer = (state: SnakeState, action: SnakeAction): SnakeState
       const hitsWall =
         nextHead.x < 0 ||
         nextHead.y < 0 ||
-        nextHead.x >= SNAKE_GRID_SIZE ||
-        nextHead.y >= SNAKE_GRID_SIZE
+        nextHead.x >= state.width ||
+        nextHead.y >= state.height
       const hitsSelf = body.some((segment) => isSamePoint(segment, nextHead))
 
       if (hitsWall || hitsSelf) {
@@ -137,7 +175,7 @@ export const snakeReducer = (state: SnakeState, action: SnakeAction): SnakeState
         direction,
         score,
         highScore: Math.max(state.highScore, score),
-        food: isEating ? placeFood(snake, action.random) : state.food,
+        food: isEating ? placeFood(snake, action.random, state.width, state.height) : state.food,
       }
     }
   }
