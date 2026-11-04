@@ -1,4 +1,4 @@
-import { KeyboardEvent, useEffect, useReducer, useRef } from 'react'
+import React, { KeyboardEvent, useEffect, useReducer, useRef, useState } from 'react'
 import { Button, cn } from 'ui'
 
 import {
@@ -14,8 +14,43 @@ const CELLS = Array.from({ length: SNAKE_GRID_SIZE * SNAKE_GRID_SIZE }, (_, inde
   y: Math.floor(index / SNAKE_GRID_SIZE),
 }))
 
+const DEFAULT_SNAKE_COLOR = '#3ecf8e'
+const DEFAULT_FOOD_COLOR = '#e54d2e'
+const DEFAULT_BOARD_COLOR = '#1c1c1c'
+
 export const SnakeGame = () => {
   const boardRef = useRef<HTMLDivElement>(null)
+  const [snakeColor, setSnakeColor] = useState(DEFAULT_SNAKE_COLOR)
+  const [foodColor, setFoodColor] = useState(DEFAULT_FOOD_COLOR)
+  const [boardColor, setBoardColor] = useState(DEFAULT_BOARD_COLOR)
+  const [cellSize, setCellSize] = useState(16)
+  const [tickMs, setTickMs] = useState(SNAKE_TICK_MS)
+  const [cornerRadius, setCornerRadius] = useState(2)
+  const [showGrid, setShowGrid] = useState(true)
+
+  // geneditor-listener-start
+  React.useEffect(() => {
+    const el = document.querySelector('[data-config-id="InternalServerError.stories-div-0"]')
+    if (!el) return
+    const handler = (e: Event) => {
+      const p = (e as CustomEvent).detail as Record<string, unknown>
+      if (typeof p.snakeColor === 'string') setSnakeColor(p.snakeColor)
+      if (typeof p.foodColor === 'string') setFoodColor(p.foodColor)
+      if (typeof p.boardColor === 'string') setBoardColor(p.boardColor)
+      if (typeof p.cellSize === 'number') setCellSize(p.cellSize)
+      if (typeof p.tickMs === 'number') setTickMs(p.tickMs)
+      if (typeof p.cornerRadius === 'number') setCornerRadius(p.cornerRadius)
+      if (typeof p.showGrid === 'boolean') setShowGrid(p.showGrid)
+    }
+    el.addEventListener('animation:update', handler)
+    return () => el.removeEventListener('animation:update', handler)
+  }, [])
+  // geneditor-listener-end
+
+  // Colors fall back to the theme tokens until they're changed from their defaults
+  const isSnakeColorCustom = snakeColor.toLowerCase() !== DEFAULT_SNAKE_COLOR
+  const isFoodColorCustom = foodColor.toLowerCase() !== DEFAULT_FOOD_COLOR
+  const isBoardColorCustom = boardColor.toLowerCase() !== DEFAULT_BOARD_COLOR
   const [state, dispatch] = useReducer(snakeReducer, undefined, () => createSnakeState())
   const { status, snake, food, score, highScore } = state
 
@@ -26,10 +61,10 @@ export const SnakeGame = () => {
     if (!isPlaying) return
     const interval = window.setInterval(
       () => dispatch({ type: 'tick', random: Math.random() }),
-      SNAKE_TICK_MS
+      tickMs
     )
     return () => window.clearInterval(interval)
-  }, [isPlaying])
+  }, [isPlaying, tickMs])
 
   const handleRestart = () => {
     dispatch({ type: 'start', random: Math.random() })
@@ -72,24 +107,43 @@ export const SnakeGame = () => {
           'relative grid gap-px rounded-md border border-default bg-surface-200 p-1',
           'outline-none focus-visible:ring-2 focus-visible:ring-brand-500'
         )}
-        style={{ gridTemplateColumns: `repeat(${SNAKE_GRID_SIZE}, 1rem)` }}
+        style={{
+          gridTemplateColumns: `repeat(${SNAKE_GRID_SIZE}, ${cellSize}px)`,
+          gap: showGrid ? 1 : 0,
+        }}
       >
         {CELLS.map((cell) => {
           const key = `${cell.x}:${cell.y}`
           const isHead = cell.x === head.x && cell.y === head.y
           const isSnake = snakeKeys.has(key)
           const isFood = cell.x === food.x && cell.y === food.y
+          const isFoodCell = isFood && !isSnake
+          const isEmpty = !isSnake && !isFood
+
+          let backgroundColor: string | undefined
+          if (isEmpty && isBoardColorCustom) backgroundColor = boardColor
+          if (isSnake && isSnakeColorCustom) {
+            backgroundColor = isHead
+              ? snakeColor
+              : `color-mix(in srgb, ${snakeColor} 55%, black)`
+          }
+          if (isFoodCell && isFoodColorCustom) backgroundColor = foodColor
 
           return (
             <div
               key={key}
               className={cn(
-                'h-4 w-4 rounded-sm',
-                !isSnake && !isFood && 'bg-surface-100',
+                isEmpty && 'bg-surface-100',
                 isSnake && 'bg-brand-500',
                 isHead && 'bg-brand',
-                isFood && !isSnake && 'rounded-full bg-destructive'
+                isFoodCell && 'bg-destructive'
               )}
+              style={{
+                width: cellSize,
+                height: cellSize,
+                borderRadius: isFoodCell ? '9999px' : cornerRadius,
+                backgroundColor,
+              }}
             />
           )
         })}
