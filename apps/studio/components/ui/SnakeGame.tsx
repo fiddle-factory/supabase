@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon } from 'lucide-react'
+import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from 'react'
 import { Button, cn, KeyboardShortcut } from 'ui'
 
 type Point = { x: number; y: number }
@@ -146,6 +147,35 @@ export const SnakeGame = ({ className }: SnakeGameProps) => {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [status, start, queueDirection])
 
+  const handleDirectionPress = useCallback(
+    (direction: Point) => {
+      if (status === 'playing') queueDirection(direction)
+      else start(direction)
+    },
+    [status, start, queueDirection]
+  )
+
+  const renderPadButton = (direction: Point, label: string, icon: ReactNode) => (
+    <Button
+      variant="default"
+      size="tiny"
+      aria-label={label}
+      icon={icon}
+      className="h-8 w-8 touch-manipulation select-none px-0"
+      onPointerDown={(event) => {
+        event.preventDefault()
+        handleDirectionPress(direction)
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          event.stopPropagation()
+          handleDirectionPress(direction)
+        }
+      }}
+    />
+  )
+
   const { snake, food, score } = gameRef.current
 
   return (
@@ -223,6 +253,25 @@ export const SnakeGame = ({ className }: SnakeGameProps) => {
           </div>
         </div>
         <p className="text-xs text-foreground-lighter">Use arrow keys or WASD to move</p>
+      </div>
+
+      <div
+        role="group"
+        aria-label="Snake movement controls"
+        className="grid grid-cols-3 grid-rows-2 gap-1"
+      >
+        <div className="col-start-2 row-start-1 flex justify-center">
+          {renderPadButton(UP, 'Move up', <ChevronUpIcon size={16} strokeWidth={1.5} />)}
+        </div>
+        <div className="col-start-1 row-start-2 flex justify-center">
+          {renderPadButton(LEFT, 'Move left', <ChevronLeftIcon size={16} strokeWidth={1.5} />)}
+        </div>
+        <div className="col-start-2 row-start-2 flex justify-center">
+          {renderPadButton(DOWN, 'Move down', <ChevronDownIcon size={16} strokeWidth={1.5} />)}
+        </div>
+        <div className="col-start-3 row-start-2 flex justify-center">
+          {renderPadButton(RIGHT, 'Move right', <ChevronRightIcon size={16} strokeWidth={1.5} />)}
+        </div>
       </div>
     </div>
   )
