@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
-import { Button, cn } from 'ui'
+import { Button, cn, KeyboardShortcut } from 'ui'
 
 type Point = { x: number; y: number }
 type Status = 'idle' | 'playing' | 'over'
@@ -213,7 +213,17 @@ export const SnakeGame = ({ className }: SnakeGameProps) => {
         )}
       </div>
 
-      <p className="text-xs text-foreground-lighter">Use arrow keys or WASD to move</p>
+      <div className="flex items-center gap-x-3">
+        <div aria-hidden="true" className="flex flex-col items-center gap-y-0.5">
+          <KeyboardShortcut keys={['ArrowUp']} className="w-5 justify-center" />
+          <div className="flex gap-x-0.5">
+            <KeyboardShortcut keys={['ArrowLeft']} className="w-5 justify-center" />
+            <KeyboardShortcut keys={['ArrowDown']} className="w-5 justify-center" />
+            <KeyboardShortcut keys={['ArrowRight']} className="w-5 justify-center" />
+          </div>
+        </div>
+        <p className="text-xs text-foreground-lighter">Use arrow keys or WASD to move</p>
+      </div>
     </div>
   )
 }
