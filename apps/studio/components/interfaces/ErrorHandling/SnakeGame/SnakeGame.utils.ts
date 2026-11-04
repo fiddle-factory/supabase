@@ -1,0 +1,144 @@
+export const SNAKE_GRID_SIZE = 16
+export const SNAKE_TICK_MS = 120
+
+export type SnakeDirection = 'up' | 'down' | 'left' | 'right'
+
+export type SnakePoint = { x: number; y: number }
+
+export type SnakeStatus = 'idle' | 'playing' | 'over'
+
+export type SnakeState = {
+  status: SnakeStatus
+  snake: SnakePoint[]
+  food: SnakePoint
+  direction: SnakeDirection
+  pendingDirection: SnakeDirection
+  score: number
+  highScore: number
+}
+
+export type SnakeAction =
+  | { type: 'start'; random: number }
+  | { type: 'turn'; direction: SnakeDirection }
+  | { type: 'tick'; random: number }
+
+const DIRECTION_VECTORS: Record<SnakeDirection, SnakePoint> = {
+  up: { x: 0, y: -1 },
+  down: { x: 0, y: 1 },
+  left: { x: -1, y: 0 },
+  right: { x: 1, y: 0 },
+}
+
+const OPPOSITE_DIRECTIONS: Record<SnakeDirection, SnakeDirection> = {
+  up: 'down',
+  down: 'up',
+  left: 'right',
+  right: 'left',
+}
+
+const KEY_DIRECTIONS: Record<string, SnakeDirection> = {
+  ArrowUp: 'up',
+  ArrowDown: 'down',
+  ArrowLeft: 'left',
+  ArrowRight: 'right',
+  w: 'up',
+  s: 'down',
+  a: 'left',
+  d: 'right',
+}
+
+export const getDirectionFromKey = (key: string): SnakeDirection | undefined =>
+  KEY_DIRECTIONS[key.length === 1 ? key.toLowerCase() : key]
+
+const isSamePoint = (a: SnakePoint, b: SnakePoint) => a.x === b.x && a.y === b.y
+
+/** Picks a free cell for the food using a random number in [0, 1). */
+export const placeFood = (snake: SnakePoint[], random: number, size = SNAKE_GRID_SIZE) => {
+  const freeCells: SnakePoint[] = []
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      if (!snake.some((segment) => segment.x === x && segment.y === y)) freeCells.push({ x, y })
+    }
+  }
+  if (freeCells.length === 0) return snake[0]
+  return freeCells[Math.min(freeCells.length - 1, Math.floor(random * freeCells.length))]
+}
+
+const createInitialSnake = (size = SNAKE_GRID_SIZE): SnakePoint[] => {
+  const mid = Math.floor(size / 2)
+  return [
+    { x: mid, y: mid },
+    { x: mid - 1, y: mid },
+    { x: mid - 2, y: mid },
+  ]
+}
+
+export const createSnakeState = (highScore = 0, random = 0.5): SnakeState => {
+  const snake = createInitialSnake()
+  return {
+    status: 'idle',
+    snake,
+    food: placeFood(snake, random),
+    direction: 'right',
+    pendingDirection: 'right',
+    score: 0,
+    highScore,
+  }
+}
+
+export const snakeReducer = (state: SnakeState, action: SnakeAction): SnakeState => {
+  switch (action.type) {
+    case 'start':
+      return { ...createSnakeState(state.highScore, action.random), status: 'playing' }
+
+    case 'turn': {
+      if (state.status === 'over') return state
+      if (action.direction === OPPOSITE_DIRECTIONS[state.direction]) return state
+      return {
+        ...state,
+        status: 'playing',
+        pendingDirection: action.direction,
+      }
+    }
+
+    case 'tick': {
+      if (state.status !== 'playing') return state
+
+      const direction = state.pendingDirection
+      const vector = DIRECTION_VECTORS[direction]
+      const head = state.snake[0]
+      const nextHead = { x: head.x + vector.x, y: head.y + vector.y }
+      const isEating = isSamePoint(nextHead, state.food)
+      // The tail moves away this tick unless the snake grows
+      const body = isEating ? state.snake : state.snake.slice(0, -1)
+
+      const hitsWall =
+        nextHead.x < 0 ||
+        nextHead.y < 0 ||
+        nextHead.x >= SNAKE_GRID_SIZE ||
+        nextHead.y >= SNAKE_GRID_SIZE
+      const hitsSelf = body.some((segment) => isSamePoint(segment, nextHead))
+
+      if (hitsWall || hitsSelf) {
+        return {
+          ...state,
+          direction,
+          status: 'over',
+          highScore: Math.max(state.highScore, state.score),
+        }
+      }
+
+      const snake = [nextHead, ...body]
+      const score = isEating ? state.score + 1 : state.score
+
+      return {
+        ...state,
+        snake,
+        direction,
+        score,
+        highScore: Math.max(state.highScore, score),
+        food: isEating ? placeFood(snake, action.random) : state.food,
+      }
+    }
+  }
+}
