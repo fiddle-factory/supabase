@@ -6,10 +6,16 @@ import { useRouter } from 'next/router'
 import { Button } from 'ui'
 
 import { SupportLink } from '@/components/interfaces/Support/SupportLink'
+import { SnakeGame } from '@/components/ui/SnakeGame'
 import { useLastVisitedOrganization } from '@/hooks/misc/useLastVisitedOrganization'
 import { useSignOut } from '@/lib/auth'
 
-const Error500: NextPage = () => {
+interface Error500Props {
+  /** Shows a playable Snake mini-game below the actions */
+  showSnakeGame?: boolean
+}
+
+const Error500: NextPage<Error500Props> = ({ showSnakeGame = false }) => {
   const router = useRouter()
   const signOut = useSignOut()
   const { resolvedTheme } = useTheme()
@@ -71,6 +77,7 @@ const Error500: NextPage = () => {
           <SupportLink>Submit a support request</SupportLink>
         </Button>
       </div>
+      {showSnakeGame && <SnakeGame className="pt-4" />}
     </div>
   )
 }
