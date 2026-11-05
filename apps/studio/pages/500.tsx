@@ -5,11 +5,17 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Button } from 'ui'
 
+import { SnakeGame } from '@/components/interfaces/ErrorHandling/SnakeGame/SnakeGame'
 import { SupportLink } from '@/components/interfaces/Support/SupportLink'
 import { useLastVisitedOrganization } from '@/hooks/misc/useLastVisitedOrganization'
 import { useSignOut } from '@/lib/auth'
 
-const Error500: NextPage = () => {
+type Error500Props = {
+  /** Shows a small Snake game below the error actions while the user waits */
+  hasSnakeGame?: boolean
+}
+
+const Error500: NextPage<Error500Props> = ({ hasSnakeGame = false }) => {
   const router = useRouter()
   const signOut = useSignOut()
   const { resolvedTheme } = useTheme()
@@ -71,6 +77,11 @@ const Error500: NextPage = () => {
           <SupportLink>Submit a support request</SupportLink>
         </Button>
       </div>
+      {hasSnakeGame && (
+        <div className="w-[320px] border-t border-default pt-6">
+          <SnakeGame />
+        </div>
+      )}
     </div>
   )
 }
