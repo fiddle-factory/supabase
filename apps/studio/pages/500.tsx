@@ -3,13 +3,18 @@ import { useTheme } from 'next-themes'
 import Image from 'next/legacy/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import type { PropsWithChildren } from 'react'
 import { Button } from 'ui'
 
 import { SupportLink } from '@/components/interfaces/Support/SupportLink'
 import { useLastVisitedOrganization } from '@/hooks/misc/useLastVisitedOrganization'
 import { useSignOut } from '@/lib/auth'
 
-const Error500: NextPage = () => {
+/**
+ * `children` is an optional slot rendered below the actions, e.g. a mini-game
+ * to pass the time while the user waits.
+ */
+const Error500: NextPage<PropsWithChildren> = ({ children }) => {
   const router = useRouter()
   const signOut = useSignOut()
   const { resolvedTheme } = useTheme()
@@ -71,6 +76,7 @@ const Error500: NextPage = () => {
           <SupportLink>Submit a support request</SupportLink>
         </Button>
       </div>
+      {children && <div className="flex w-full justify-center px-4 pt-4">{children}</div>}
     </div>
   )
 }
