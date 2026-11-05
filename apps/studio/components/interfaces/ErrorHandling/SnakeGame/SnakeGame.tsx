@@ -1,4 +1,4 @@
-import { KeyboardEvent, useEffect, useReducer, useRef } from 'react'
+import React, { KeyboardEvent, useEffect, useReducer, useRef, useState } from 'react'
 import { Button, cn } from 'ui'
 
 import {
@@ -15,6 +15,24 @@ const BOARD_SIZE = GRID_SIZE * CELL_SIZE
 export const SnakeGame = () => {
   const [state, dispatch] = useReducer(snakeGameReducer, undefined, () => createInitialState())
   const boardRef = useRef<HTMLDivElement>(null)
+  // Corner radius of each snake segment in px (0 = square, half the segment size = fully round)
+  const [segmentRadius, setSegmentRadius] = useState(2)
+  // Milliseconds between game ticks (lower = faster)
+  const [tickMs, setTickMs] = useState(TICK_MS)
+
+  // geneditor-listener-start
+  React.useEffect(() => {
+    const el = document.querySelector('[data-config-id="InternalServerError.stories-div-0"]')
+    if (!el) return
+    const handler = (e: Event) => {
+      const p = (e as CustomEvent).detail as Record<string, unknown>
+      if (typeof p.segmentRadius === 'number') setSegmentRadius(p.segmentRadius)
+      if (typeof p.tickMs === 'number') setTickMs(p.tickMs)
+    }
+    el.addEventListener('animation:update', handler)
+    return () => el.removeEventListener('animation:update', handler)
+  }, [])
+  // geneditor-listener-end
 
   const isPlaying = state.status === 'playing'
   const isGameOver = state.status === 'over'
@@ -23,9 +41,9 @@ export const SnakeGame = () => {
     if (!isPlaying) return
     const interval = window.setInterval(() => {
       dispatch({ type: 'tick', seed: Math.random() })
-    }, TICK_MS)
+    }, tickMs)
     return () => window.clearInterval(interval)
-  }, [isPlaying])
+  }, [isPlaying, tickMs])
 
   const handleRestart = () => {
     dispatch({ type: 'restart' })
@@ -88,8 +106,9 @@ export const SnakeGame = () => {
           <div
             key={`${segment.x}-${segment.y}-${index}`}
             aria-hidden
-            className={cn('absolute rounded-sm', index === 0 ? 'bg-brand-600' : 'bg-brand')}
+            className={cn('absolute', index === 0 ? 'bg-brand-600' : 'bg-brand')}
             style={{
+              borderRadius: segmentRadius,
               left: segment.x * CELL_SIZE + 1,
               top: segment.y * CELL_SIZE + 1,
               width: CELL_SIZE - 2,
