@@ -5,11 +5,17 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Button } from 'ui'
 
+import { TetrisGame } from '@/components/interfaces/ErrorHandling/TetrisGame'
 import { SupportLink } from '@/components/interfaces/Support/SupportLink'
 import { useLastVisitedOrganization } from '@/hooks/misc/useLastVisitedOrganization'
 import { useSignOut } from '@/lib/auth'
 
-const Error500: NextPage = () => {
+interface Error500Props {
+  /** Shows a small Tetris game below the error actions as a diversion while waiting */
+  showGame?: boolean
+}
+
+const Error500: NextPage<Error500Props> = ({ showGame = false }) => {
   const router = useRouter()
   const signOut = useSignOut()
   const { resolvedTheme } = useTheme()
@@ -71,6 +77,12 @@ const Error500: NextPage = () => {
           <SupportLink>Submit a support request</SupportLink>
         </Button>
       </div>
+      {showGame && (
+        <div className="flex flex-col items-center gap-2 pt-4">
+          <p className="text-sm text-foreground-light">While you wait, how about a quick game?</p>
+          <TetrisGame />
+        </div>
+      )}
     </div>
   )
 }
