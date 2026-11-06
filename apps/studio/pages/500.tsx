@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Button } from 'ui'
 
+import { TetrisGame } from '@/components/interfaces/Error500/TetrisGame'
 import { SupportLink } from '@/components/interfaces/Support/SupportLink'
 import { useLastVisitedOrganization } from '@/hooks/misc/useLastVisitedOrganization'
 import { useSignOut } from '@/lib/auth'
@@ -70,6 +71,10 @@ const Error500: NextPage = () => {
         <Button variant="secondary" asChild>
           <SupportLink>Submit a support request</SupportLink>
         </Button>
+      </div>
+      <div className="flex flex-col items-center space-y-2 pt-4">
+        <p className="text-sm text-foreground-light">While you wait, how about a quick game?</p>
+        <TetrisGame />
       </div>
     </div>
   )
