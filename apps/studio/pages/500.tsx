@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Button } from 'ui'
 
+import { SnakeGame } from '@/components/interfaces/ErrorHandling/SnakeGame/SnakeGame'
 import { SupportLink } from '@/components/interfaces/Support/SupportLink'
 import { useLastVisitedOrganization } from '@/hooks/misc/useLastVisitedOrganization'
 import { useSignOut } from '@/lib/auth'
@@ -71,6 +72,7 @@ const Error500: NextPage = () => {
           <SupportLink>Submit a support request</SupportLink>
         </Button>
       </div>
+      <SnakeGame />
     </div>
   )
 }
