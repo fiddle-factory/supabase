@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import React, { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { Button, cn } from 'ui'
 
 import {
@@ -21,6 +21,20 @@ export const SnakeGame = () => {
   const [game, setGame] = useState<SnakeState>(() => createInitialState())
   const [hasStarted, setHasStarted] = useState(false)
   const [bestScore, setBestScore] = useState(0)
+  const [tickMs, setTickMs] = useState(TICK_MS)
+
+  // geneditor-listener-start
+  React.useEffect(() => {
+    const el = document.querySelector('[data-config-id="SnakeGame-controls"]')
+    if (!el) return
+    const handler = (e: Event) => {
+      const p = (e as CustomEvent).detail as Record<string, unknown>
+      if (typeof p.tickMs === 'number') setTickMs(p.tickMs)
+    }
+    el.addEventListener('animation:update', handler)
+    return () => el.removeEventListener('animation:update', handler)
+  }, [])
+  // geneditor-listener-end
 
   let status: GameStatus = 'playing'
   if (!hasStarted) status = 'idle'
@@ -30,9 +44,9 @@ export const SnakeGame = () => {
     if (status !== 'playing') return
     const interval = window.setInterval(() => {
       setGame((current) => advanceSnake(current, nextDirectionRef.current))
-    }, TICK_MS)
+    }, tickMs)
     return () => window.clearInterval(interval)
-  }, [status])
+  }, [status, tickMs])
 
   const handleStart = () => {
     setBestScore((best) => Math.max(best, game.score))
@@ -57,7 +71,7 @@ export const SnakeGame = () => {
   }
 
   return (
-    <div className="flex w-[240px] flex-col gap-2">
+    <div data-config-id="SnakeGame-controls" className="flex w-[240px] flex-col gap-2">
       <div className="flex items-center justify-between text-xs">
         <span className="text-foreground-light">
           Score <span className="font-mono text-foreground">{game.score}</span>
