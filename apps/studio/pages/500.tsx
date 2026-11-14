@@ -5,12 +5,17 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Button } from 'ui'
 
-import { SnakeGame } from '@/components/interfaces/ErrorHandling/SnakeGame'
+import { SnakeGame, type SnakeGameInitialState } from '@/components/interfaces/ErrorHandling/SnakeGame'
 import { SupportLink } from '@/components/interfaces/Support/SupportLink'
 import { useLastVisitedOrganization } from '@/hooks/misc/useLastVisitedOrganization'
 import { useSignOut } from '@/lib/auth'
 
-const Error500: NextPage = () => {
+interface Error500Props {
+  /** Optional seed for the embedded snake game (used for previews). */
+  snakeGameInitialState?: SnakeGameInitialState
+}
+
+const Error500: NextPage<Error500Props> = ({ snakeGameInitialState }) => {
   const router = useRouter()
   const signOut = useSignOut()
   const { resolvedTheme } = useTheme()
@@ -52,7 +57,7 @@ const Error500: NextPage = () => {
           persists.
         </p>
       </div>
-      <SnakeGame />
+      <SnakeGame initialState={snakeGameInitialState} />
       <div className="flex items-center space-x-4">
         {router.pathname !== '/organizations' ? (
           <Button variant="primary" asChild>

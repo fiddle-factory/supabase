@@ -5,9 +5,25 @@ const GRID_SIZE = 16
 const CELL_SIZE = 14
 const TICK_MS = 120
 
-type Point = { x: number; y: number }
-type Direction = 'up' | 'down' | 'left' | 'right'
-type Status = 'idle' | 'playing' | 'over'
+export type Point = { x: number; y: number }
+export type Direction = 'up' | 'down' | 'left' | 'right'
+export type Status = 'idle' | 'playing' | 'over'
+
+/** Optional seed for the game's initial state. Omitting it keeps the default idle board. */
+export interface SnakeGameInitialState {
+  status?: Status
+  snake?: Point[]
+  food?: Point
+  score?: number
+  bestScore?: number
+  direction?: Direction
+  /** When playing, hold the board still until the first key press. */
+  paused?: boolean
+}
+
+export interface SnakeGameProps {
+  initialState?: SnakeGameInitialState
+}
 
 const DIRECTION_VECTORS: Record<Direction, Point> = {
   up: { x: 0, y: -1 },
@@ -46,17 +62,22 @@ const randomFood = (snake: Point[]): Point => {
   return free[Math.floor(Math.random() * free.length)] ?? { x: 0, y: 0 }
 }
 
-export const SnakeGame = () => {
+export const SnakeGame = ({ initialState }: SnakeGameProps = {}) => {
   const boardRef = useRef<HTMLDivElement>(null)
-  const [snake, setSnake] = useState<Point[]>(INITIAL_SNAKE)
-  const [food, setFood] = useState<Point>({ x: 11, y: 8 })
-  const [status, setStatus] = useState<Status>('idle')
-  const [score, setScore] = useState(0)
-  const [bestScore, setBestScore] = useState(0)
+  const seededSnake = initialState?.snake ?? INITIAL_SNAKE
+  const seededDirection = initialState?.direction ?? 'right'
+  const [snake, setSnake] = useState<Point[]>(seededSnake)
+  const [food, setFood] = useState<Point>(initialState?.food ?? { x: 11, y: 8 })
+  const [status, setStatus] = useState<Status>(initialState?.status ?? 'idle')
+  const [score, setScore] = useState(initialState?.score ?? 0)
+  const [bestScore, setBestScore] = useState(
+    initialState?.bestScore ?? initialState?.score ?? 0
+  )
+  const [paused, setPaused] = useState(initialState?.paused ?? false)
 
-  const snakeRef = useRef<Point[]>(INITIAL_SNAKE)
-  const directionRef = useRef<Direction>('right')
-  const queuedDirectionRef = useRef<Direction>('right')
+  const snakeRef = useRef<Point[]>(seededSnake)
+  const directionRef = useRef<Direction>(seededDirection)
+  const queuedDirectionRef = useRef<Direction>(seededDirection)
 
   const startGame = useCallback(() => {
     const initial = INITIAL_SNAKE.map((p) => ({ ...p }))
@@ -67,11 +88,12 @@ export const SnakeGame = () => {
     setFood(randomFood(initial))
     setScore(0)
     setStatus('playing')
+    setPaused(false)
     boardRef.current?.focus()
   }, [])
 
   useEffect(() => {
-    if (status !== 'playing') return
+    if (status !== 'playing' || paused) return
 
     const interval = window.setInterval(() => {
       const prev = snakeRef.current
@@ -101,7 +123,7 @@ export const SnakeGame = () => {
     }, TICK_MS)
 
     return () => window.clearInterval(interval)
-  }, [status, food])
+  }, [status, food, paused])
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const direction = KEY_TO_DIRECTION[event.key]
@@ -114,6 +136,7 @@ export const SnakeGame = () => {
       if (direction !== OPPOSITES[directionRef.current]) {
         queuedDirectionRef.current = direction
       }
+      if (paused) setPaused(false)
       return
     }
     if ((event.key === ' ' || event.key === 'Enter') && status !== 'playing') {
