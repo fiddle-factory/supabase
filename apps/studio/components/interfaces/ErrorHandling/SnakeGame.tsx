@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import React, { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { Button, cn } from 'ui'
 
 const GRID_SIZE = 16
 const CELL_SIZE = 14
 const TICK_MS = 120
+const SEGMENT_RADIUS = 2
 
 export type Point = { x: number; y: number }
 export type Direction = 'up' | 'down' | 'left' | 'right'
@@ -74,6 +75,22 @@ export const SnakeGame = ({ initialState }: SnakeGameProps = {}) => {
     initialState?.bestScore ?? initialState?.score ?? 0
   )
   const [paused, setPaused] = useState(initialState?.paused ?? false)
+  const [tickMs, setTickMs] = useState(TICK_MS)
+  const [segmentRadius, setSegmentRadius] = useState(SEGMENT_RADIUS)
+
+  // geneditor-listener-start
+  React.useEffect(() => {
+    const el = document.querySelector('[data-config-id="InternalServerError.stories-div-0"]')
+    if (!el) return
+    const handler = (e: Event) => {
+      const p = (e as CustomEvent).detail as Record<string, unknown>
+      if (typeof p.tickMs === 'number') setTickMs(p.tickMs)
+      if (typeof p.segmentRadius === 'number') setSegmentRadius(p.segmentRadius)
+    }
+    el.addEventListener('animation:update', handler)
+    return () => el.removeEventListener('animation:update', handler)
+  }, [])
+  // geneditor-listener-end
 
   const snakeRef = useRef<Point[]>(seededSnake)
   const directionRef = useRef<Direction>(seededDirection)
@@ -120,10 +137,10 @@ export const SnakeGame = ({ initialState }: SnakeGameProps = {}) => {
         setBestScore((b) => Math.max(b, updated))
         setFood(randomFood(next))
       }
-    }, TICK_MS)
+    }, tickMs)
 
     return () => window.clearInterval(interval)
-  }, [status, food, paused])
+  }, [status, food, paused, tickMs])
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const direction = KEY_TO_DIRECTION[event.key]
@@ -169,12 +186,13 @@ export const SnakeGame = ({ initialState }: SnakeGameProps = {}) => {
         {snake.map((segment, index) => (
           <div
             key={index}
-            className={cn('absolute rounded-[2px]', index === 0 ? 'bg-brand' : 'bg-brand-500')}
+            className={cn('absolute', index === 0 ? 'bg-brand' : 'bg-brand-500')}
             style={{
               left: segment.x * CELL_SIZE + 1,
               top: segment.y * CELL_SIZE + 1,
               width: CELL_SIZE - 2,
               height: CELL_SIZE - 2,
+              borderRadius: segmentRadius,
             }}
           />
         ))}
