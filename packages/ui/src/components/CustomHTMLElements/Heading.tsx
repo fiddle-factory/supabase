@@ -3,6 +3,8 @@
 import { forwardRef, useCallback, type HTMLAttributes } from 'react'
 import { useInView } from 'react-intersection-observer'
 
+import { cn } from '../../lib/utils/cn'
+
 import {
   getAnchor,
   highlightSelectedTocItem,
@@ -26,7 +28,7 @@ interface Props extends HTMLAttributes<HTMLHeadingElement> {
  * (see: /pages/guides/cli/config.tsx)
  */
 const Heading = forwardRef(
-  ({ tag, customAnchor, children, ...props }: React.PropsWithChildren<Props>, forwardedRef) => {
+  ({ tag, customAnchor, children, className, ...props }: React.PropsWithChildren<Props>, forwardedRef) => {
     const HeadingTag = `${tag}` as any
     const anchor = customAnchor ? customAnchor : getAnchor(children, props)
     const link = `#${anchor}`
@@ -53,7 +55,12 @@ const Heading = forwardRef(
     )
 
     return (
-      <HeadingTag id={anchor} ref={combinedRef} className="group scroll-mt-24" {...props}>
+      <HeadingTag
+        id={anchor}
+        ref={combinedRef}
+        className={cn('group scroll-mt-24', tag === 'h1' && 'font-bold', className)}
+        {...props}
+      >
         {removeAnchor(children)}
         {anchor && (
           <a
