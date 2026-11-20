@@ -120,6 +120,7 @@ export interface ProjectLayoutProps {
   selectedTable?: string
   resizableSidebar?: boolean
   productMenuClassName?: string
+  contentClassName?: string
 }
 
 export const ProjectLayout = forwardRef<HTMLDivElement, PropsWithChildren<ProjectLayoutProps>>(
@@ -137,6 +138,7 @@ export const ProjectLayout = forwardRef<HTMLDivElement, PropsWithChildren<Projec
       resizableSidebar = false,
 
       productMenuClassName,
+      contentClassName,
     },
     ref
   ) => {
@@ -346,7 +348,10 @@ export const ProjectLayout = forwardRef<HTMLDivElement, PropsWithChildren<Projec
               />
             )}
             <ResizablePanel
-              className={cn('h-full flex flex-col w-full xl:min-w-[600px] bg-dash-sidebar')}
+              className={cn(
+                'h-full flex flex-col w-full xl:min-w-[600px] bg-dash-sidebar',
+                contentClassName
+              )}
               id="panel-project-content"
             >
               <main

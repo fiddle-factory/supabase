@@ -363,7 +363,7 @@ const PrivilegesPage: NextPageWithLayout = () => {
 
 PrivilegesPage.getLayout = (page) => (
   <DefaultLayout>
-    <DatabaseLayout title="Column Privileges">{page}</DatabaseLayout>
+    <DatabaseLayout title="Column Privileges" contentClassName="bg-blue-500">{page}</DatabaseLayout>
   </DefaultLayout>
 )
 

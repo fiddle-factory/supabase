@@ -9,6 +9,7 @@ import { withAuth } from '@/hooks/misc/withAuth'
 
 export interface DatabaseLayoutProps {
   title: string
+  contentClassName?: string
 }
 
 export const DatabaseProductMenu = () => {
@@ -19,7 +20,11 @@ export const DatabaseProductMenu = () => {
   return <ProductMenu page={page} menu={menu} />
 }
 
-const DatabaseLayoutContent = ({ children, title }: PropsWithChildren<DatabaseLayoutProps>) => {
+const DatabaseLayoutContent = ({
+  children,
+  title,
+  contentClassName,
+}: PropsWithChildren<DatabaseLayoutProps>) => {
   const router = useRouter()
   const page = router.pathname.split('/')[4]
   const menu = useGenerateDatabaseMenu()
@@ -30,6 +35,7 @@ const DatabaseLayoutContent = ({ children, title }: PropsWithChildren<DatabaseLa
       browserTitle={{ section: title }}
       productMenu={<ProductMenu page={page} menu={menu} />}
       isBlocking={false}
+      contentClassName={contentClassName}
     >
       <ProductMenuShortcuts menu={menu} />
       {children}
