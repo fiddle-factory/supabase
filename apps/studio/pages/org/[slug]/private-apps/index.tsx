@@ -41,7 +41,7 @@ function PrivateAppsContent() {
       <PageHeader size="default">
         <PageHeaderMeta>
           <PageHeaderSummary>
-            <PageHeaderTitle>Private Apps</PageHeaderTitle>
+            <PageHeaderTitle className="text-7xl">Private Apps</PageHeaderTitle>
             <PageHeaderDescription>
               Create private apps to generate scoped access tokens for your organization
             </PageHeaderDescription>
