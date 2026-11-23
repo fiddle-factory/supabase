@@ -34,7 +34,7 @@ export const ForgotPasswordLayout = ({
   return (
     <div
       className={cn(
-        'min-h-screen flex-1 bg-studio flex flex-col gap-8 lg:gap-16 xl:gap-32',
+        'min-h-screen flex-1 bg-studio flex flex-col gap-8 lg:gap-16 xl:gap-32 opacity-75',
         className
       )}
     >
